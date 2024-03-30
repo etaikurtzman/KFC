@@ -1,36 +1,74 @@
 import pygame
 import threading
+from classes.pieces.bishop import Bishop
+from classes.pieces.rook import Rook
+from classes.pieces.knight import Knight
+from classes.pieces.king import King
+from classes.pieces.pawn import Pawn
+from classes.pieces.queen import Queen
 
-LIGHT_COLOR = 'white'
-DARK_COLOR  = 'black'
+PIECE_LIGHT_COLOR = 'white'
+PIECE_DARK_COLOR  = 'black'
 
 
-class board:
-    def __init__(self):
-        grid = [[None for _ in range(8)] for _ in range(8)]
-        gridLocks =  [[threading.Lock for _ in range(8)] for _ in range(8)]
+class Board:
+    def __init__(self, screen):
+        self.screen = screen
+        self.length = 8
+        self.pixelLength = 800
+        self.grid = [[None for _ in range(8)] for _ in range(8)]
+        self.gridLocks =  [[threading.Lock for _ in range(8)] for _ in range(8)]
         
-        grid[0][0] = Rook(DARK_COLOR)
-        grid[7][0] = Rook(DARK_COLOR)
+        self.grid[0][0] = Rook(PIECE_DARK_COLOR)
+        self.grid[7][0] = Rook(PIECE_DARK_COLOR)
 
-        grid[0][1] = Knight(DARK_COLOR)
-        grid[6][0] = Knight(DARK_COLOR)
+        self.grid[1][0] = Knight(PIECE_DARK_COLOR)
+        self.grid[6][0] = Knight(PIECE_DARK_COLOR)
 
-        grid[0][2] = Bishop(DARK_COLOR)
-        grid[5][0] = Bishop(DARK_COLOR)
+        self.grid[2][0] = Bishop(PIECE_DARK_COLOR)
+        self.grid[5][0] = Bishop(PIECE_DARK_COLOR)
 
-        grid[0][7] = Rook(LIGHT_COLOR)
-        grid[7][7] = Rook(LIGHT_COLOR)
+        self.grid[3][0] = King(PIECE_DARK_COLOR)
+        self.grid[4][0] = Queen(PIECE_DARK_COLOR)
+        
+        self.grid[0][7] = Rook(PIECE_LIGHT_COLOR)
+        self.grid[7][7] = Rook(PIECE_LIGHT_COLOR)
 
-        grid[0][6] = Knight(LIGHT_COLOR)
-        grid[6][6] = Knight(LIGHT_COLOR)
+        self.grid[1][7] = Knight(PIECE_LIGHT_COLOR)
+        self.grid[6][7] = Knight(PIECE_LIGHT_COLOR)
 
-        grid[0][5] = Bishop(LIGHT_COLOR)
-        grid[5][5] = Bishop(LIGHT_COLOR)
+        self.grid[2][7] = Bishop(PIECE_LIGHT_COLOR)
+        self.grid[5][7] = Bishop(PIECE_LIGHT_COLOR)
 
-        for i in range(0, 8):
-            grid[i][1] = Pawn(DARK_COLOR)
-            grid[i][6] = Pawn(LIGHT_COLOR)
+        self.grid[3][7] = King(PIECE_LIGHT_COLOR)
+        self.grid[4][7] = Queen(PIECE_LIGHT_COLOR)
+
+        # for i in range(0, 8):
+            # self.grid[i][1] = Pawn(PIECE_DARK_COLOR)
+            # self.grid[i][6] = Pawn(PIECE_LIGHT_COLOR)
+        
+
+    def move(self, src, dest):
+        (src_col, src_row) = src
+        if not self.grid[src_col][src_row]:
+            return False # no piece at origin
+        (dest_col, dest_row) = dest
+        if (self.grid[src_col][src_row].can_move(src, dest)):
+            passed = self.grid[src_col][src_row].pass_through(src, dest)
+            for (i,j) in passed:
+                if self.grid[i][j]:
+                    return False # piece in the way
+        if self.grid[dest_col][dest_row]:
+            if self.grid[dest_col][dest_row].color == self.grid[src_col][src_row].color:
+                return False # friendly fire
+        
+        self.grid[dest_col][dest_row] = self.grid[src_col][src_row]
+        self.grid[src_col][src_row] = None
+                
         
         
-
+    def draw(self):
+        for i in range(self.length):
+            for j in range(self.length):
+                if self.grid[i][j]:
+                    self.screen.blit(self.grid[i][j].image, ((i * (self.pixelLength // self.length)), (j * (self.pixelLength // self.length))))
