@@ -9,3 +9,13 @@ class King(Piece):
             self.image = pygame.image.load('imgs/b_king.png')
 
         self.image = pygame.transform.scale(self.image, (100, 100))
+
+    def can_move(self, src, dest):
+        (src_col, src_row) = src
+        (dest_col, dest_row) = dest
+        if src == dest:
+            return False
+        return ((abs(src_col - dest_col)) < 2 and (abs(src_row - dest_row) < 2))
+    
+    def pass_through(self, src, dest):
+        return []

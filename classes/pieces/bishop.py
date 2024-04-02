@@ -25,26 +25,18 @@ class Bishop(Piece):
         (src_col, src_row) = src
         (dest_col, dest_row) = dest
 
-        col_inc = (src_col - dest_col) / abs(src_col - dest_col)
-        row_inc = (src_row - dest_row) / abs(src_row - dest_row)
+        col_inc = (dest_col - src_col) // abs(src_col - dest_col)
+        row_inc = (dest_row - src_row) // abs(src_row - dest_row)
 
         squares_passed = []
 
         i = src_col + col_inc
         j = src_row + row_inc
-        for _ in range(src_col + 1, dest_col):
+        for _ in range(abs(src_col - dest_col) - 1):
             squares_passed.append((i, j))
             i += col_inc
             j += row_inc
+        
+        return squares_passed
 
 
-
-
-        # if (src_col != dest_col):
-        #     start = min(src_col, dest_col)
-        #     end = max(src_col, dest_col)
-        #     return [(i, dest_row) for i in range(start + 1, end)]
-        # else:
-        #     start = min(src_row, dest_row)
-        #     end = max(src_row, dest_row)
-        #     return [(dest_col, j) for j in range(start + 1, end)]

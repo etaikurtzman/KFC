@@ -26,24 +26,33 @@ def main():
             if event.type == pygame.MOUSEBUTTONDOWN:
                 print("down")
                 if event.button == 1:
-                    for row in board.grid:
-                        for p in row:
-                            print("looping through pieces")
-                            if p and p.image.get_rect().collidepoint(event.pos):
-                                print("piece selected")
-                                dragging = True
-                                piece = p
+                    mouse_x, mouse_y = event.pos
+                    start = (mouse_x // (LENGTH // 8), mouse_y // (LENGTH // 8))
+
+                    
+                    # for row in board.grid:
+                    #    for p in row:
+                    #        if p and p.image.get_rect().collidepoint(event.pos):
+                    #            print("piece selected")
+                                # dragging = True
+                                # piece = p
 
             if event.type == pygame.MOUSEBUTTONUP:
                 print("up")
                 if event.button == 1:
-                    dragging = False
-                    piece = None
-            if event.type == pygame.MOUSEMOTION:
-                print("moving mouse")
-                if dragging and piece:
-                    print("Dragging")
-                    board.grid[piece].get_rect().move_ip(event.rel)
+                    mouse_x, mouse_y = event.pos
+                    end = (mouse_x // (LENGTH // 8), mouse_y // (LENGTH // 8))
+                    if start and end:
+                        board.move(start, end)
+                    start = None 
+                    end = None
+                    # dragging = False
+                    # piece = None
+            # if event.type == pygame.MOUSEMOTION:
+            #     print("moving mouse")
+            #     if dragging and piece:
+            #         print("Dragging")
+            #         board.grid[piece].get_rect().move_ip(event.rel)
 
 
         pygame.display.flip()
@@ -67,9 +76,10 @@ def main():
         # screen.blit(pygame.transform.scale(rook, (100, 100)), (0, 0))
         board.draw()
         pygame.display.update()
-        pygame.time.wait(1000)
-        board.move((0, 0), (0, 7))
-        board.move((1, 0), (2, 2))
+        # pygame.time.wait(1000)
+        # board.move((0, 0), (0, 7))
+        # board.move((1, 0), (2, 2))
+        # board.move((2, 0), (3, 1))
         # time.sleep(1)
         
         
