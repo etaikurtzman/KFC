@@ -21,6 +21,13 @@ class Rook(Piece):
     
     #def draw(self, screen):
     #    screen.blit(self.image, self.rect.topleft)
+
+
+    def toString(self):
+        if self.color == 'white':
+            return 'wr'
+        else:
+            return 'br'
         
 
     # Returns true iff move can be valid (given any board state)

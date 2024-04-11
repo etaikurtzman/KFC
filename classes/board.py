@@ -78,7 +78,15 @@ class Board:
         self.grid[dest_col][dest_row] = self.grid[src_col][src_row]
         self.grid[src_col][src_row] = None
         
-        
+    def grid_to_string(self):
+        s = ""
+        for i in range(self.length):
+            for j in range(self.length):
+                if self.grid[i][j]:
+                    s += (self.grid[i][j].toString() + ",")
+                else:
+                    s += ".,"
+        return s
         
     def draw(self):
         for i in range(self.length):

@@ -9,6 +9,14 @@ class King(Piece):
             self.image = pygame.image.load('imgs/b_king.png')
 
         self.image = pygame.transform.scale(self.image, (100, 100))
+    
+
+    def toString(self):
+        if self.color == 'white':
+            return 'wk'
+        else:
+            return 'bk'
+        
 
     def can_move(self, src, dest):
         (src_col, src_row) = src

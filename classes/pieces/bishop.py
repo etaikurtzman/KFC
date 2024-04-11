@@ -10,6 +10,12 @@ class Bishop(Piece):
 
         self.image = pygame.transform.scale(self.image, (100, 100))
 
+    def toString(self):
+        if self.color == 'white':
+            return 'wb'
+        else:
+            return 'bb'
+
 
     # Returns true iff move can be valid (given any board state)
     def can_move(self, src, dest):

@@ -10,6 +10,13 @@ class Knight(Piece):
             self.image = pygame.image.load('imgs/b_knight.png')
 
         self.image = pygame.transform.scale(self.image, (100, 100))
+    
+
+    def toString(self):
+        if self.color == 'white':
+            return 'wn'
+        else:
+            return 'bn'
 
 
     # Returns true iff move can be valid (given any board state)

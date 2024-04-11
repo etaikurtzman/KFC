@@ -24,7 +24,6 @@ def main():
                 running = False
 
             if event.type == pygame.MOUSEBUTTONDOWN:
-                print("down")
                 if event.button == 1:
                     mouse_x, mouse_y = event.pos
                     start = (mouse_x // (LENGTH // 8), mouse_y // (LENGTH // 8))
@@ -38,7 +37,6 @@ def main():
                                 # piece = p
 
             if event.type == pygame.MOUSEBUTTONUP:
-                print("up")
                 if event.button == 1:
                     mouse_x, mouse_y = event.pos
                     end = (mouse_x // (LENGTH // 8), mouse_y // (LENGTH // 8))

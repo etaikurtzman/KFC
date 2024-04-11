@@ -12,6 +12,13 @@ class Pawn(Piece):
         self.image = pygame.transform.scale(self.image, (100, 100))
 
 
+    def toString(self):
+        if self.color == 'white':
+            return 'wp'
+        else:
+            return 'bp'
+
+
     # Returns true iff move can be valid (given any board state)
     # For pawn, this function returns true only if the pawn is not capturing,
     # but moving forward. There is a separate can_capture method

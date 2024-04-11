@@ -10,6 +10,14 @@ class Queen(Piece):
 
         self.image = pygame.transform.scale(self.image, (100, 100))
     
+
+    def toString(self):
+        if self.color == 'white':
+            return 'wq'
+        else:
+            return 'bq'
+
+    
     def can_move(self, src, dest):
         (src_col, src_row) = src
         (dest_col, dest_row) = dest
