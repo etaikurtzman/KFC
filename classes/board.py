@@ -12,10 +12,9 @@ PIECE_DARK_COLOR  = 'black'
 
 
 class Board:
-    def __init__(self, screen):
-        self.screen = screen
+    def __init__(self):
         self.length = 8
-        self.pixelLength = 800
+        # self.pixelLength = 800
         self.grid = [[None for _ in range(8)] for _ in range(8)]
         self.gridLocks =  [[threading.Lock for _ in range(8)] for _ in range(8)]
         
@@ -88,8 +87,8 @@ class Board:
                     s += ".,"
         return s
         
-    def draw(self):
-        for i in range(self.length):
-            for j in range(self.length):
-                if self.grid[i][j]:
-                    self.screen.blit(self.grid[i][j].image, ((i * (self.pixelLength // self.length)), (j * (self.pixelLength // self.length))))
+    # def draw(self):
+    #     for i in range(self.length):
+    #         for j in range(self.length):
+    #             if self.grid[i][j]:
+    #                 self.screen.blit(self.grid[i][j].image, ((i * (self.pixelLength // self.length)), (j * (self.pixelLength // self.length))))

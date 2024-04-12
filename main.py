@@ -53,7 +53,7 @@ def main():
             #         board.grid[piece].get_rect().move_ip(event.rel)
 
 
-        pygame.display.flip()
+        
             
 
         # Fill the background with white
@@ -73,6 +73,7 @@ def main():
 
         # screen.blit(pygame.transform.scale(rook, (100, 100)), (0, 0))
         board.draw()
+        #pygame.display.flip()
         pygame.display.update()
         # pygame.time.wait(1000)
         # board.move((0, 0), (0, 7))
