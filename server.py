@@ -41,6 +41,8 @@ def main():
         thread.join()
     print("Server loop stopped")
 
+
+
 def client_loop(conn1, conn2, playerColor, board):
     conn1.send(str.encode(playerColor))
     conn1.sendall(str.encode(board.grid_to_string()))
@@ -52,7 +54,6 @@ def client_loop(conn1, conn2, playerColor, board):
             if msg == "Quit":
                 print("Quit has been recieved")
                 conn1.sendall(str.encode("Quit"))
-                # conn2.sendall(str.encode("Quit"))
                 print("Client loop has stopped")
                 break
             start, end = eval(msg)
@@ -61,10 +62,6 @@ def client_loop(conn1, conn2, playerColor, board):
             conn2.sendall(str.encode(board.grid_to_string()))
         except:
             break
-    # receive a move
-    # attempt to grab squares
-    # if sucessful, update board
-    # send board to all players
 
 
 

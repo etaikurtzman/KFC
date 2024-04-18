@@ -40,8 +40,27 @@ class Player:
     def getUpdatesLoop(self):
         while True:
             msg = self.network.receive()
-            print("msg is: ", msg)
-            if msg == "Quit":
+            if msg[0:5] == "white":
+                print("White Wins!")
+                self.screen.fill('yellow')
+                self.draw_board()
+                self.draw_pieces(msg[5:])
+                font = pygame.font.Font(None, 100) #100 font size
+                text = font.render('White Wins!', True, (50, 50, 255)) #bluish
+                self.screen.blit(text, (200, 325))
+                pygame.display.update()
+                break
+            elif msg[0:5] == "black":
+                print("Black Wins!")
+                self.screen.fill('yellow')
+                self.draw_board()
+                self.draw_pieces(msg[5:])
+                font = pygame.font.Font(None, 100) #100 font size
+                text = font.render('Black Wins!', True, (50, 50, 255)) #bluish
+                self.screen.blit(text, (200, 325))
+                pygame.display.update()
+                break
+            elif msg == "Quit":
                 print("getUpdatesLoop has stopped")
                 break
             board = msg
@@ -79,8 +98,6 @@ class Player:
                             self.network.sendMove(str((start, end)))
                         start = None
                         end = None
-        
-        
         pygame.quit()
         print("Get moves loop stopped")
  

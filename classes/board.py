@@ -14,6 +14,7 @@ PIECE_DARK_COLOR  = 'black'
 class Board:
     def __init__(self):
         self.length = 8
+        self.winner = None
         # self.pixelLength = 800
         self.grid = [[None for _ in range(8)] for _ in range(8)]
         self.gridLocks =  [[threading.Lock for _ in range(8)] for _ in range(8)]
@@ -74,10 +75,16 @@ class Board:
             if self.grid[dest_col][dest_row].color == self.grid[src_col][src_row].color:
                 return False # friendly fire
         
+        if isinstance(self.grid[dest_col][dest_row], King):
+            if self.grid[dest_col][dest_row].color == PIECE_LIGHT_COLOR:
+                self.winner = PIECE_DARK_COLOR
+            else:
+                self.winner = PIECE_LIGHT_COLOR
+
         self.grid[dest_col][dest_row] = self.grid[src_col][src_row]
         self.grid[src_col][src_row] = None
         
-    def grid_to_string(self):
+    def grid_to_string(self):        
         s = ""
         for i in range(self.length):
             for j in range(self.length):
@@ -85,7 +92,10 @@ class Board:
                     s += (self.grid[i][j].toString() + ",")
                 else:
                     s += ".,"
-        return s
+        if self.winner:
+            return self.winner + s
+        else:
+            return s
         
     # def draw(self):
     #     for i in range(self.length):
