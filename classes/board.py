@@ -62,6 +62,7 @@ class Board:
         if not self.grid[src_col][src_row]:
             return False # no piece at origin
         
+
         # ensure player is moving their own piece
         if playerColor != self.grid[src_col][src_row].color:
             return False
