@@ -40,6 +40,7 @@ class Player:
     def getUpdatesLoop(self):
         while True:
             msg = self.network.receive()
+            #print(msg)
             if msg[0:5] == "white":
                 self.screen.fill('yellow')
                 self.draw_board()
@@ -86,6 +87,7 @@ class Player:
                             mouse_x = BOARD_LENGTH - 1 - mouse_x
                             mouse_y = BOARD_LENGTH - 1 - mouse_y
                         start = (mouse_x // (BOARD_LENGTH // 8), mouse_y // (BOARD_LENGTH // 8))
+                        #print(start)
                 
                 if event.type == pygame.MOUSEBUTTONUP:
                     if event.button == 1:
@@ -95,8 +97,10 @@ class Player:
                             mouse_x = BOARD_LENGTH - 1 - mouse_x
                             mouse_y = BOARD_LENGTH - 1 - mouse_y
                         end = (mouse_x // (BOARD_LENGTH // 8), mouse_y // (BOARD_LENGTH // 8))
+                        #print(end)
                         if start and end:
                             self.network.sendMove(str((start, end)))
+                        #print("move sent")
                         start = None
                         end = None
         pygame.quit()

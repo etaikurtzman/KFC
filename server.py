@@ -32,9 +32,11 @@ def main():
         print("Connected to: ", addr)
         conns.append(conn)
         numPlayers += 1
-
+    
+    board.start_timer() # tells the board to start timing
     thread1 = threading.Thread(target=client_loop, args=[conns[0], conns[1], colors[0], board])
     thread2 = threading.Thread(target=client_loop, args=[conns[1], conns[0], colors[1], board])
+    
     threads = [thread1, thread2]
     for thread in threads:
         thread.start()
@@ -47,14 +49,21 @@ def client_loop(conn1, conn2, playerColor, board):
     while True:
         try:
             msg = conn1.recv(2048).decode()
+            # print(msg)
             if msg == "Quit":
                 conn1.sendall(str.encode("Quit"))
                 break
             start, end = eval(msg)
-            
+            # print("entering board.move")
             board.move(start, end, playerColor)
-            conn1.sendall(str.encode(board.grid_to_string()))
-            conn2.sendall(str.encode(board.grid_to_string()))
+            # print("out of board.move")
+            tosend = (board.grid_to_string())
+            # print(tosend)
+            # print(conn1, conn2)
+            conn1.sendall(str.encode(tosend))
+            # print("sent to conn 1")
+            conn2.sendall(str.encode(tosend))
+            # print("sent updated boards")
         except:
             break
 

@@ -6,6 +6,7 @@ from classes.pieces.knight import Knight
 from classes.pieces.king import King
 from classes.pieces.pawn import Pawn
 from classes.pieces.queen import Queen
+import time
 
 PIECE_LIGHT_COLOR = 'white'
 PIECE_DARK_COLOR  = 'black'
@@ -15,7 +16,7 @@ class Board:
     def __init__(self):
         self.length = 8
         self.winner = None
-        # self.pixelLength = 800
+
         self.grid = [[None for _ in range(8)] for _ in range(8)]
         self.gridLocks =  [[threading.Lock for _ in range(8)] for _ in range(8)]
         
@@ -46,16 +47,32 @@ class Board:
         for i in range(0, 8):
             self.grid[i][1] = Pawn(PIECE_DARK_COLOR)
             self.grid[i][6] = Pawn(PIECE_LIGHT_COLOR)
+
+        self.startTime = None
+    
+    def start_timer(self):
+        self.startTime = time.perf_counter()
         
 
     def move(self, src, dest, playerColor):
         (src_col, src_row) = src
         (dest_col, dest_row) = dest
 
+        # If trying to move a piece from an empty square
+        if not self.grid[src_col][src_row]:
+            return False # no piece at origin
+        
         # ensure player is moving their own piece
         if playerColor != self.grid[src_col][src_row].color:
             return False
-
+        
+        
+        
+        # checks if the piece moved recently
+        # print(time.perf_counter())
+        if self.grid[src_col][src_row].movedRecently(time.perf_counter()):
+            return False
+        # print("hello")
         # checking if destination is the king, if so winner is set
         possible_winner = None
         if isinstance(self.grid[dest_col][dest_row], King):
@@ -64,9 +81,8 @@ class Board:
             else:
                 possible_winner = PIECE_LIGHT_COLOR
 
-        # If trying to move a piece from an empty square
-        if not self.grid[src_col][src_row]:
-            return False # no piece at origin
+        
+        
         
         # If trying to move a pawn
         if isinstance(self.grid[src_col][src_row], Pawn):
@@ -74,9 +90,11 @@ class Board:
                 if self.grid[dest_col][dest_row].color != self.grid[src_col][src_row].color:
                     if self.grid[src_col][src_row].can_capture(src, dest):
                         if dest_row == 0 or dest_row == 7:
-                            self.grid[dest_col][dest_row] = Queen(playerColor) # Successful pawn move (promotion to queen)
+                            self.grid[dest_col][dest_row] = Queen(playerColor)
+                            self.grid[dest_col][dest_row].updateTimer(time.perf_counter()) # Successful pawn move (promotion to queen)
                         else:
-                            self.grid[dest_col][dest_row] = self.grid[src_col][src_row]  # Successful pawn move
+                            self.grid[dest_col][dest_row] = self.grid[src_col][src_row]
+                            self.grid[dest_col][dest_row].updateTimer(time.perf_counter())  # Successful pawn move
                         self.grid[src_col][src_row] = None
                         self.winner = possible_winner
                     return True
@@ -148,9 +166,10 @@ class Board:
             if self.grid[dest_col][dest_row].color == self.grid[src_col][src_row].color:
                 return False # friendly fire
         
-        # Successful move
+        # Successful movead
         self.grid[dest_col][dest_row] = self.grid[src_col][src_row]
         self.grid[src_col][src_row] = None
+        self.grid[dest_col][dest_row].updateTimer(time.perf_counter())
         self.winner = possible_winner
         
         # if the king or rook have moved
@@ -159,13 +178,17 @@ class Board:
            self.grid[dest_col][dest_row].hasMoved = True
         return True
         
-    def grid_to_string(self):        
+    def grid_to_string(self):     
+        #print("in grid to string")   
         s = ""
         for i in range(self.length):
             for j in range(self.length):
+                #print("in for loop:", i , j)
                 if self.grid[i][j]:
+                    #print("theres a piece here!")
                     s += (self.grid[i][j].toString() + ",")
                 else:
+                    #print("no piece")
                     s += ".,"
         s = s[:-1]
         if self.winner:
