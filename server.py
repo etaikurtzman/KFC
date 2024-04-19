@@ -1,5 +1,6 @@
 import socket
 import threading
+import copy
 from classes.board import Board
 
 MAX_USERS = 2
@@ -39,9 +40,6 @@ def main():
         thread.start()
     for thread in threads:
         thread.join()
-    print("Server loop stopped")
-
-
 
 def client_loop(conn1, conn2, playerColor, board):
     conn1.send(str.encode(playerColor))
@@ -49,15 +47,12 @@ def client_loop(conn1, conn2, playerColor, board):
     while True:
         try:
             msg = conn1.recv(2048).decode()
-            print(type(msg))
-            print("server msg is: ", msg)
             if msg == "Quit":
-                print("Quit has been recieved")
                 conn1.sendall(str.encode("Quit"))
-                print("Client loop has stopped")
                 break
             start, end = eval(msg)
-            board.move(start, end)
+            
+            board.move(start, end, playerColor)
             conn1.sendall(str.encode(board.grid_to_string()))
             conn2.sendall(str.encode(board.grid_to_string()))
         except:

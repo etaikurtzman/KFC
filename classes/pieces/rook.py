@@ -3,25 +3,7 @@ from classes.piece import Piece
 class Rook(Piece):
     def __init__(self, color):
         super().__init__(color)
-        if self.color == 'white':
-            self.image = pygame.image.load('imgs/w_rook.png')
-        else:
-            self.image = pygame.image.load('imgs/b_rook.png')
-
-        self.image = pygame.transform.scale(self.image, (100, 100))
-        
-        # code for experimenting
-        #self.rect = self.image.get_rect()
-        #self.topleft = (x, y)
-        #self.dragging = False
-    
-    #def update(self):
-    #    if self.dragging:
-    #        self.rect.center = pygame.mouse.get_pos()
-    
-    #def draw(self, screen):
-    #    screen.blit(self.image, self.rect.topleft)
-
+        self.hasMoved = False
 
     def toString(self):
         if self.color == 'white':

@@ -3,12 +3,7 @@ from classes.piece import Piece
 class King(Piece):
     def __init__(self, color):
         super().__init__(color)
-        if self.color == 'white':
-            self.image = pygame.image.load('imgs/w_king.png')
-        else:
-            self.image = pygame.image.load('imgs/b_king.png')
-
-        self.image = pygame.transform.scale(self.image, (100, 100))
+        self.hasMoved = False
     
 
     def toString(self):
@@ -24,6 +19,18 @@ class King(Piece):
         if src == dest:
             return False
         return ((abs(src_col - dest_col)) < 2 and (abs(src_row - dest_row) < 2))
+    
+    def can_castle(self, src, dest):
+        (src_col, src_row) = src
+        (dest_col, dest_row) = dest
+        
+        if self.color == 'white':
+            if (dest_col, dest_row) == (2, 7) or (dest_col, dest_row) == (6, 7):
+                return True
+        else:
+            if (dest_col, dest_row) == (2, 0) or (dest_col, dest_row) == (6, 0):
+                return True
+        return False
     
     def pass_through(self, src, dest):
         return []

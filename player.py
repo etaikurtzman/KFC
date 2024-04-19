@@ -41,7 +41,6 @@ class Player:
         while True:
             msg = self.network.receive()
             if msg[0:5] == "white":
-                print("White Wins!")
                 self.screen.fill('yellow')
                 self.draw_board()
                 self.draw_pieces(msg[5:])
@@ -51,7 +50,6 @@ class Player:
                 pygame.display.update()
                 break
             elif msg[0:5] == "black":
-                print("Black Wins!")
                 self.screen.fill('yellow')
                 self.draw_board()
                 self.draw_pieces(msg[5:])
@@ -61,11 +59,8 @@ class Player:
                 pygame.display.update()
                 break
             elif msg == "Quit":
-                print("getUpdatesLoop has stopped")
                 break
             board = msg
-            print("received more from player")
-            print(board)
             self.screen.fill('yellow')
             self.draw_board()
             self.draw_pieces(board)
@@ -75,7 +70,6 @@ class Player:
             pygame.display.update()
 
     def getMovesLoop(self):
-        print("In getMovesLoop!")
         running = True
         while running:
             for event in pygame.event.get():
@@ -83,27 +77,37 @@ class Player:
                     running = False
                     self.network.sendMove("Quit")
                     # self.stop_event.set()
-
+                
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     if event.button == 1:
                         mouse_x, mouse_y = event.pos
+                        # rotate 180 degrees for player with black pieces
+                        if self.color == "black":
+                            mouse_x = BOARD_LENGTH - 1 - mouse_x
+                            mouse_y = BOARD_LENGTH - 1 - mouse_y
                         start = (mouse_x // (BOARD_LENGTH // 8), mouse_y // (BOARD_LENGTH // 8))
-
+                
                 if event.type == pygame.MOUSEBUTTONUP:
                     if event.button == 1:
                         mouse_x, mouse_y = event.pos
+                        # rotate 180 degrees for player with black pieces
+                        if self.color == "black":
+                            mouse_x = BOARD_LENGTH - 1 - mouse_x
+                            mouse_y = BOARD_LENGTH - 1 - mouse_y
                         end = (mouse_x // (BOARD_LENGTH // 8), mouse_y // (BOARD_LENGTH // 8))
                         if start and end:
-                            print("Sending move to server")
                             self.network.sendMove(str((start, end)))
                         start = None
                         end = None
         pygame.quit()
-        print("Get moves loop stopped")
- 
+        
+
+
+
     def draw_pieces(self, encoded_board):
-        print("draw pieces")
         decoded_board = encoded_board.split(',')
+        if self.color == "black":
+            decoded_board.reverse()
         index = 0
         for i in range(self.length):
             for j in range(self.length):
@@ -113,7 +117,6 @@ class Player:
                 index += 1
 
     def draw_board(self):
-        print("draw_board called")
         self.screen.fill('yellow')
         for i in range(0, 8):
             for j in range(0, 8):
