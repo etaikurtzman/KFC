@@ -52,6 +52,10 @@ class Board:
         (src_col, src_row) = src
         (dest_col, dest_row) = dest
 
+        # If trying to move a piece from an empty square
+        if not self.grid[src_col][src_row]:
+            return False # no piece at origin
+
         # ensure player is moving their own piece
         if playerColor != self.grid[src_col][src_row].color:
             return False
@@ -63,10 +67,6 @@ class Board:
                 possible_winner = PIECE_DARK_COLOR
             else:
                 possible_winner = PIECE_LIGHT_COLOR
-
-        # If trying to move a piece from an empty square
-        if not self.grid[src_col][src_row]:
-            return False # no piece at origin
         
         # If trying to move a pawn
         if isinstance(self.grid[src_col][src_row], Pawn):

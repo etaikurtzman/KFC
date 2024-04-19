@@ -55,7 +55,8 @@ def client_loop(conn1, conn2, playerColor, board):
             board.move(start, end, playerColor)
             conn1.sendall(str.encode(board.grid_to_string()))
             conn2.sendall(str.encode(board.grid_to_string()))
-        except:
+        except Exception as e:
+            print("Exception caused: ", e)
             break
 
 
