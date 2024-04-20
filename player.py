@@ -1,3 +1,7 @@
+# player.py
+# 
+# 
+
 from network import Network
 import pygame
 import threading
