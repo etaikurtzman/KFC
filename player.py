@@ -43,8 +43,8 @@ class Player:
         self.otherPiece = False
 
     def getUpdatesLoop(self):
-        # message_counter = 2
-        while True:
+        running = True
+        while running:
             # if self.winner:
             #     break
             mailbox = self.network.receive()
@@ -61,7 +61,7 @@ class Player:
                         self.screen.blit(text, (200, 325))
                         pygame.display.update()
                         # self.winner = True
-                        break
+                        running = False
                     elif msg[0:5] == "black":
                         self.screen.fill('yellow')
                         self.draw_board()
@@ -71,9 +71,9 @@ class Player:
                         self.screen.blit(text, (200, 325))
                         pygame.display.update()
                         # self.winner = True
-                        break
+                        running = False
                     elif msg == "Quit":
-                        break
+                        running = False
                     elif msg.startswith("CLICKED:"):
                         (clicked_coordinates, clicked_piece) = eval(msg[len("CLICKED:"):])
                         self.draggingPiece = piece_images.get(clicked_piece)
@@ -94,20 +94,21 @@ class Player:
                     else:
                         board = msg
                     
-                    self.screen.fill('yellow')
-                    self.draw_board()
-                    if self.clickedPiece == True:
-                        self.draw_clicked_and_dragged_squares(click_x, click_y, 'cyan')
-                    if self.draggedPiece == True:
-                        self.draw_clicked_and_dragged_squares(dragged_x, dragged_y, 'blue')
-                    if self.otherPiece == True:
-                        print("in drawing other squares")
-                        self.draw_clicked_and_dragged_squares(other_x, other_y, 'turquoise') 
-                    self.draw_pieces(board)
-                    
-                    pygame.draw.circle(self.screen, (200, 0, 255), (BOARD_LENGTH - 250, BOARD_LENGTH - 250), 75)
-                    
-                    pygame.display.update()
+                    if running:
+                        self.screen.fill('yellow')
+                        self.draw_board()
+                        if self.clickedPiece == True:
+                            self.draw_clicked_and_dragged_squares(click_x, click_y, 'cyan')
+                        if self.draggedPiece == True:
+                            self.draw_clicked_and_dragged_squares(dragged_x, dragged_y, 'blue')
+                        if self.otherPiece == True:
+                            print("in drawing other squares")
+                            self.draw_clicked_and_dragged_squares(other_x, other_y, 'turquoise') 
+                        self.draw_pieces(board)
+                        
+                        pygame.draw.circle(self.screen, (200, 0, 255), (BOARD_LENGTH - 250, BOARD_LENGTH - 250), 75)
+                        
+                        pygame.display.update()
 
     def getMovesLoop(self):
         running = True
@@ -115,7 +116,7 @@ class Player:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     running = False
-                    self.network.sendMove("Quit")
+                    self.network.sendQuit()
                 
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     if event.button == 1:
@@ -141,6 +142,7 @@ class Player:
                         start = None
                         end = None
         pygame.quit()
+        print("quitting getmovesloop")
         
 
     def draw_pieces(self, encoded_board):

@@ -49,7 +49,8 @@ def client_loop(conn1, conn2, playerColor, board):
     while True:
         try:
             msg = conn1.recv(2048).decode()
-            if msg == "Quit":
+            if msg == "QUIT":
+                print("got message to quit")
                 conn1.send(str.encode("Quit" + '|'))
                 conn1.close()
                 break
@@ -57,11 +58,8 @@ def client_loop(conn1, conn2, playerColor, board):
                 move = msg[len("MOVE:"):]
                 start, end = eval(move)
                 if board.move(start, end, playerColor):
-                    print("in server, successful move")
                     conn1.send(str.encode("END:" + str(end) + '|'))
                     conn2.send(str.encode("END-OTHER:" + str(end) + '|'))
-                else:
-                    print("unsuccessful move")
                 tosend = (board.grid_to_string())
                 conn1.send(str.encode(str(tosend) + '|'))
                 conn2.send(str.encode(str(tosend) + '|'))

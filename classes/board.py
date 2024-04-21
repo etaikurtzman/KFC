@@ -57,7 +57,6 @@ class Board:
         
 
     def move(self, src, dest, playerColor):
-        print(f"in board move, Making a move from {src} to {dest}")
         if src == dest:
             return False
 
@@ -68,9 +67,7 @@ class Board:
         dest_lock = self.gridLocks[dest_col][dest_row].acquire(timeout=1)
 
         if src_lock and dest_lock:
-            print("locks have been acquired!")
             try:
-                print("in try, trying to make a move")
                 # If trying to move a piece from an empty square
                 if not self.grid[src_col][src_row]:
                     return False # no piece at origin
@@ -120,47 +117,70 @@ class Board:
                         # check player color
                         if playerColor == PIECE_LIGHT_COLOR:
                             # check queenside castle for white is valid
-                            if dest == (2, 7) and (not self.grid[1][7]) and (not self.grid[2][7]) and (not self.grid[3][7]) and isinstance(self.grid[0][7], Rook) and self.grid[0][7].color == PIECE_LIGHT_COLOR and (not self.grid[0][7].hasMoved):
-                                # move king
-                                self.grid[2][7] = self.grid[4][7]
-                                self.grid[2][7].hasMoved = True
-                                self.grid[4][7] = None
-                                # move rook
-                                self.grid[3][7] = self.grid[0][7]
-                                self.grid[3][7].hasMoved = True
-                                self.grid[0][7] = None
+                            if dest == (2, 7) and self.gridLocks[1][7].acquire(timeout=1) and self.gridLocks[3][7].acquire(timeout=1) and self.gridLocks[0][7].acquire(timeout=1):
+                                try:
+                                    if (not self.grid[1][7]) and (not self.grid[2][7]) and (not self.grid[3][7]) and isinstance(self.grid[0][7], Rook) and self.grid[0][7].color == PIECE_LIGHT_COLOR and (not self.grid[0][7].hasMoved):
+                                    # move king
+                                        self.grid[2][7] = self.grid[4][7]
+                                        self.grid[2][7].hasMoved = True
+                                        self.grid[4][7] = None
+                                        # move rook
+                                        self.grid[3][7] = self.grid[0][7]
+                                        self.grid[3][7].hasMoved = True
+                                        self.grid[0][7] = None
+                                finally:
+                                    self.gridLocks[1][7].release()
+                                    self.gridLocks[3][7].release()
+                                    self.gridLocks[0][7].release()
 
                             # check kingside castle for white is valid
-                            if dest == (6, 7) and (not self.grid[5][7]) and (not self.grid[6][7]) and isinstance(self.grid[7][7], Rook) and self.grid[7][7].color == PIECE_LIGHT_COLOR and (not self.grid[7][7].hasMoved):
-                                # move king
-                                self.grid[6][7] = self.grid[4][7]
-                                self.grid[6][7].hasMoved = True
-                                self.grid[4][7] = None
-                                # move rook
-                                self.grid[5][7] = self.grid[7][7]
-                                self.grid[5][7].hasMoved = True
-                                self.grid[7][7] = None
+                            if dest == (6, 7) and self.gridLocks[5][7].acquire(timeout=1) and self.gridLocks[7][7].acquire(timeout=1): 
+                                try:
+                                    if (not self.grid[5][7]) and (not self.grid[6][7]) and isinstance(self.grid[7][7], Rook) and self.grid[7][7].color == PIECE_LIGHT_COLOR and (not self.grid[7][7].hasMoved):
+                                        # move king
+                                        self.grid[6][7] = self.grid[4][7]
+                                        self.grid[6][7].hasMoved = True
+                                        self.grid[4][7] = None
+                                        # move rook
+                                        self.grid[5][7] = self.grid[7][7]
+                                        self.grid[5][7].hasMoved = True
+                                        self.grid[7][7] = None
+                                finally:
+                                    self.gridLocks[5][7].release()
+                                    self.gridLocks[7][7].release()
                         else:
                             # check queenside castle for black is valid
-                            if dest == (2, 0) and (not self.grid[1][0]) and (not self.grid[2][0]) and (not self.grid[3][0]) and isinstance(self.grid[0][0], Rook) and self.grid[0][0].color == PIECE_DARK_COLOR and (not self.grid[0][0].hasMoved):
-                                # move king
-                                self.grid[2][0] = self.grid[4][0]
-                                self.grid[2][0].hasMoved = False
-                                self.grid[4][0] = None
-                                # move rook
-                                self.grid[3][0] = self.grid[0][0]
-                                self.grid[3][0].hasMoved = True
-                                self.grid[0][0] = None
+                            if dest == (2, 0) and self.gridLocks[1][0].acquire(timeout=1) and self.gridLocks[3][0].acquire(timeout=1) and self.gridLocks[0][0].acquire(timeout=1):
+                                try:
+                                    if (not self.grid[1][0]) and (not self.grid[2][0]) and (not self.grid[3][0]) and isinstance(self.grid[0][0], Rook) and self.grid[0][0].color == PIECE_DARK_COLOR and (not self.grid[0][0].hasMoved):
+                                        # move king
+                                        self.grid[2][0] = self.grid[4][0]
+                                        self.grid[2][0].hasMoved = False
+                                        self.grid[4][0] = None
+                                        # move rook
+                                        self.grid[3][0] = self.grid[0][0]
+                                        self.grid[3][0].hasMoved = True
+                                        self.grid[0][0] = None
+                                finally:
+                                    self.gridLocks[1][0].release()
+                                    self.gridLocks[3][0].release()
+                                    self.gridLocks[0][0].release()
+
                             # check kingside castle for black is valid
-                            if dest == (6, 0) and (not self.grid[5][0]) and (not self.grid[6][0]) and isinstance(self.grid[7][0], Rook) and self.grid[7][0].color == PIECE_DARK_COLOR and (not self.grid[7][0].hasMoved):
-                                # move king
-                                self.grid[6][0] = self.grid[4][0]
-                                self.grid[6][0].hasMoved = False
-                                self.grid[4][0] = None
-                                # move rook
-                                self.grid[5][0] = self.grid[7][0]
-                                self.grid[5][0].hasMoved = True
-                                self.grid[7][0] = None
+                            if dest == (6, 0) and self.gridLocks[5][0].acquire(timeout=1) and self.gridLocks[7][0].acquire(timeout=1):
+                                try:
+                                    if (not self.grid[5][0]) and (not self.grid[6][0]) and isinstance(self.grid[7][0], Rook) and self.grid[7][0].color == PIECE_DARK_COLOR and (not self.grid[7][0].hasMoved):
+                                        # move king
+                                        self.grid[6][0] = self.grid[4][0]
+                                        self.grid[6][0].hasMoved = False
+                                        self.grid[4][0] = None
+                                        # move rook
+                                        self.grid[5][0] = self.grid[7][0]
+                                        self.grid[5][0].hasMoved = True
+                                        self.grid[7][0] = None
+                                finally:
+                                    self.gridLocks[5][0].release()
+                                    self.gridLocks[7][0].release()
                         
                         return True
 
@@ -191,16 +211,12 @@ class Board:
                   isinstance(self.grid[dest_col][dest_row], Rook):
                   self.grid[dest_col][dest_row].hasMoved = True
                 
-                print("Move has been made, return from move function")
                 return True
             
             finally:
-                print("in finally, releasing locks")
                 self.gridLocks[src_col][src_row].release()
                 self.gridLocks[dest_col][dest_row].release()
-                print("successfully released the locks")
         else:
-            print("in else, locks timeout")
             return False
     
     def click(self, click_coordinates, playerColor):
@@ -212,16 +228,12 @@ class Board:
         return self.captured
         
     def grid_to_string(self):     
-        #print("in grid to string")   
         s = ""
         for i in range(self.length):
             for j in range(self.length):
-                #print("in for loop:", i , j)
                 if self.grid[i][j]:
-                    #print("theres a piece here!")
                     s += (self.grid[i][j].toString() + ",")
                 else:
-                    #print("no piece")
                     s += ".,"
         s = s[:-1]
         if self.winner:

@@ -20,3 +20,6 @@ class Network:
         
     def sendClick(self, start):
         self.client.send(str.encode("CLICK:" + start))
+    
+    def sendQuit(self):
+        self.client.send(str.encode("QUIT"))
