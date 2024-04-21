@@ -14,9 +14,7 @@ class Queen(Piece):
     def can_move(self, src, dest):
         (src_col, src_row) = src
         (dest_col, dest_row) = dest
-
-        if src == dest:
-            return False
+        
         return (abs(src_col - dest_col) == abs(src_row - dest_row)) or (src_col == dest_col or src_row == dest_row)
     
     def pass_through(self, src, dest):

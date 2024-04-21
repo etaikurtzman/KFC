@@ -18,7 +18,7 @@ class Board:
         self.winner = None
 
         self.grid = [[None for _ in range(8)] for _ in range(8)]
-        self.gridLocks =  [[threading.Lock for _ in range(8)] for _ in range(8)]
+        self.gridLocks =  [[threading.Lock() for _ in range(8)] for _ in range(8)]
         
         self.grid[0][0] = Rook(PIECE_DARK_COLOR)
         self.grid[7][0] = Rook(PIECE_DARK_COLOR)
@@ -57,137 +57,155 @@ class Board:
         
 
     def move(self, src, dest, playerColor):
+        print(f"in board move, Making a move from {src} to {dest}")
+        if src == dest:
+            return False
+
         (src_col, src_row) = src
         (dest_col, dest_row) = dest
 
-        # If trying to move a piece from an empty square
-        if not self.grid[src_col][src_row]:
-            return False # no piece at origin
-        
+        src_lock = self.gridLocks[src_col][src_row].acquire(timeout=1)
+        dest_lock = self.gridLocks[dest_col][dest_row].acquire(timeout=1)
 
-        # ensure player is moving their own piece
-        if playerColor != self.grid[src_col][src_row].color:
-            return False
-        
-        
-        
-        # checks if the piece moved recently
-        # print(time.perf_counter())
-        if self.grid[src_col][src_row].movedRecently(time.perf_counter()):
-            return False
-        # print("hello")
-        # checking if destination is the king, if so winner is set
-        possible_winner = None
-        if isinstance(self.grid[dest_col][dest_row], King):
-            if self.grid[dest_col][dest_row].color == PIECE_LIGHT_COLOR:
-                possible_winner = PIECE_DARK_COLOR
-            else:
-                possible_winner = PIECE_LIGHT_COLOR
+        if src_lock and dest_lock:
+            print("locks have been acquired!")
+            try:
+                print("in try, trying to make a move")
+                # If trying to move a piece from an empty square
+                if not self.grid[src_col][src_row]:
+                    return False # no piece at origin
+                
 
-        
-        
-        
-        # If trying to move a pawn
-        if isinstance(self.grid[src_col][src_row], Pawn):
-            if self.grid[dest_col][dest_row]:
-                if self.grid[dest_col][dest_row].color != self.grid[src_col][src_row].color:
-                    if self.grid[src_col][src_row].can_capture(src, dest):
-                        if dest_row == 0 or dest_row == 7:
-                            self.grid[dest_col][dest_row] = Queen(playerColor)
-                            self.grid[dest_col][dest_row].updateTimer(time.perf_counter()) # Successful pawn move (promotion to queen)
+                # ensure player is moving their own piece
+                if playerColor != self.grid[src_col][src_row].color:
+                    return False
+                
+                
+                
+                # checks if the piece moved recently
+                # print(time.perf_counter())
+                if self.grid[src_col][src_row].movedRecently(time.perf_counter()):
+                    return False
+                # print("hello")
+                # checking if destination is the king, if so winner is set
+                possible_winner = None
+                if isinstance(self.grid[dest_col][dest_row], King):
+                    if self.grid[dest_col][dest_row].color == PIECE_LIGHT_COLOR:
+                        possible_winner = PIECE_DARK_COLOR
+                    else:
+                        possible_winner = PIECE_LIGHT_COLOR
+
+                # If trying to move a pawn
+                if isinstance(self.grid[src_col][src_row], Pawn):
+                    if self.grid[dest_col][dest_row]:
+                        if self.grid[dest_col][dest_row].color != self.grid[src_col][src_row].color:
+                            if self.grid[src_col][src_row].can_capture(src, dest):
+                                if dest_row == 0 or dest_row == 7:
+                                    self.grid[dest_col][dest_row] = Queen(playerColor)
+                                    self.grid[dest_col][dest_row].updateTimer(time.perf_counter()) # Successful pawn move (promotion to queen)
+                                else:
+                                    self.grid[dest_col][dest_row] = self.grid[src_col][src_row]
+                                    self.grid[dest_col][dest_row].updateTimer(time.perf_counter())  # Successful pawn move
+                                self.grid[src_col][src_row] = None
+                                self.winner = possible_winner
+                                self.captured.append(self.grid[dest_col][dest_row].toString())
+                            return True
                         else:
-                            self.grid[dest_col][dest_row] = self.grid[src_col][src_row]
-                            self.grid[dest_col][dest_row].updateTimer(time.perf_counter())  # Successful pawn move
-                        self.grid[src_col][src_row] = None
-                        self.winner = possible_winner
-                        self.captured.append(self.grid[dest_col][dest_row].toString())
-                    return True
+                            return False
+                
+                # If trying to move a king
+                if isinstance(self.grid[src_col][src_row], King):
+                    # if trying to castle
+                    if (not self.grid[src_col][src_row].hasMoved) and self.grid[src_col][src_row].can_castle(src, dest):
+                        # check player color
+                        if playerColor == PIECE_LIGHT_COLOR:
+                            # check queenside castle for white is valid
+                            if dest == (2, 7) and (not self.grid[1][7]) and (not self.grid[2][7]) and (not self.grid[3][7]) and isinstance(self.grid[0][7], Rook) and self.grid[0][7].color == PIECE_LIGHT_COLOR and (not self.grid[0][7].hasMoved):
+                                # move king
+                                self.grid[2][7] = self.grid[4][7]
+                                self.grid[2][7].hasMoved = True
+                                self.grid[4][7] = None
+                                # move rook
+                                self.grid[3][7] = self.grid[0][7]
+                                self.grid[3][7].hasMoved = True
+                                self.grid[0][7] = None
+
+                            # check kingside castle for white is valid
+                            if dest == (6, 7) and (not self.grid[5][7]) and (not self.grid[6][7]) and isinstance(self.grid[7][7], Rook) and self.grid[7][7].color == PIECE_LIGHT_COLOR and (not self.grid[7][7].hasMoved):
+                                # move king
+                                self.grid[6][7] = self.grid[4][7]
+                                self.grid[6][7].hasMoved = True
+                                self.grid[4][7] = None
+                                # move rook
+                                self.grid[5][7] = self.grid[7][7]
+                                self.grid[5][7].hasMoved = True
+                                self.grid[7][7] = None
+                        else:
+                            # check queenside castle for black is valid
+                            if dest == (2, 0) and (not self.grid[1][0]) and (not self.grid[2][0]) and (not self.grid[3][0]) and isinstance(self.grid[0][0], Rook) and self.grid[0][0].color == PIECE_DARK_COLOR and (not self.grid[0][0].hasMoved):
+                                # move king
+                                self.grid[2][0] = self.grid[4][0]
+                                self.grid[2][0].hasMoved = False
+                                self.grid[4][0] = None
+                                # move rook
+                                self.grid[3][0] = self.grid[0][0]
+                                self.grid[3][0].hasMoved = True
+                                self.grid[0][0] = None
+                            # check kingside castle for black is valid
+                            if dest == (6, 0) and (not self.grid[5][0]) and (not self.grid[6][0]) and isinstance(self.grid[7][0], Rook) and self.grid[7][0].color == PIECE_DARK_COLOR and (not self.grid[7][0].hasMoved):
+                                # move king
+                                self.grid[6][0] = self.grid[4][0]
+                                self.grid[6][0].hasMoved = False
+                                self.grid[4][0] = None
+                                # move rook
+                                self.grid[5][0] = self.grid[7][0]
+                                self.grid[5][0].hasMoved = True
+                                self.grid[7][0] = None
+                        
+                        return True
+
+                # check if there's a piece in the way
+                if (self.grid[src_col][src_row].can_move(src, dest)):
+                    passed = self.grid[src_col][src_row].pass_through(src, dest)
+                    for (i,j) in passed:
+                        if self.grid[i][j]:
+                            return False # piece in the way
                 else:
                     return False
-        
-        # If trying to move a king
-        if isinstance(self.grid[src_col][src_row], King):
-            # if trying to castle
-            if (not self.grid[src_col][src_row].hasMoved) and self.grid[src_col][src_row].can_castle(src, dest):
-                # check player color
-                if playerColor == PIECE_LIGHT_COLOR:
-                    # check queenside castle for white is valid
-                    if dest == (2, 7) and (not self.grid[1][7]) and (not self.grid[2][7]) and (not self.grid[3][7]) and isinstance(self.grid[0][7], Rook) and self.grid[0][7].color == PIECE_LIGHT_COLOR and (not self.grid[0][7].hasMoved):
-                        # move king
-                        self.grid[2][7] = self.grid[4][7]
-                        self.grid[2][7].hasMoved = True
-                        self.grid[4][7] = None
-                        # move rook
-                        self.grid[3][7] = self.grid[0][7]
-                        self.grid[3][7].hasMoved = True
-                        self.grid[0][7] = None
-
-                    # check kingside castle for white is valid
-                    if dest == (6, 7) and (not self.grid[5][7]) and (not self.grid[6][7]) and isinstance(self.grid[7][7], Rook) and self.grid[7][7].color == PIECE_LIGHT_COLOR and (not self.grid[7][7].hasMoved):
-                        # move king
-                        self.grid[6][7] = self.grid[4][7]
-                        self.grid[6][7].hasMoved = True
-                        self.grid[4][7] = None
-                        # move rook
-                        self.grid[5][7] = self.grid[7][7]
-                        self.grid[5][7].hasMoved = True
-                        self.grid[7][7] = None
-                else:
-                    # check queenside castle for black is valid
-                    if dest == (2, 0) and (not self.grid[1][0]) and (not self.grid[2][0]) and (not self.grid[3][0]) and isinstance(self.grid[0][0], Rook) and self.grid[0][0].color == PIECE_DARK_COLOR and (not self.grid[0][0].hasMoved):
-                        # move king
-                        self.grid[2][0] = self.grid[4][0]
-                        self.grid[2][0].hasMoved = False
-                        self.grid[4][0] = None
-                        # move rook
-                        self.grid[3][0] = self.grid[0][0]
-                        self.grid[3][0].hasMoved = True
-                        self.grid[0][0] = None
-                    # check kingside castle for black is valid
-                    if dest == (6, 0) and (not self.grid[5][0]) and (not self.grid[6][0]) and isinstance(self.grid[7][0], Rook) and self.grid[7][0].color == PIECE_DARK_COLOR and (not self.grid[7][0].hasMoved):
-                        # move king
-                        self.grid[6][0] = self.grid[4][0]
-                        self.grid[6][0].hasMoved = False
-                        self.grid[4][0] = None
-                        # move rook
-                        self.grid[5][0] = self.grid[7][0]
-                        self.grid[5][0].hasMoved = True
-                        self.grid[7][0] = None
                 
+                # check if your destination is a piece of the same color
+                if self.grid[dest_col][dest_row]:
+                    if self.grid[dest_col][dest_row].color == self.grid[src_col][src_row].color:
+                        return False # friendly fire
+                
+                # Successful move
+                if self.grid[dest_col][dest_row]:
+                    self.captured.append(self.grid[dest_col][dest_row].toString())
+                self.grid[dest_col][dest_row] = self.grid[src_col][src_row]
+                self.grid[src_col][src_row] = None
+                self.grid[dest_col][dest_row].updateTimer(time.perf_counter())
+                self.winner = possible_winner
+                
+                # if the king or rook have moved
+                if isinstance(self.grid[dest_col][dest_row], King) or \
+                  isinstance(self.grid[dest_col][dest_row], Rook):
+                  self.grid[dest_col][dest_row].hasMoved = True
+                
+                print("Move has been made, return from move function")
                 return True
-
-        # check if there's a piece in the way
-        if (self.grid[src_col][src_row].can_move(src, dest)):
-            passed = self.grid[src_col][src_row].pass_through(src, dest)
-            for (i,j) in passed:
-                if self.grid[i][j]:
-                    return False # piece in the way
+            
+            finally:
+                print("in finally, releasing locks")
+                self.gridLocks[src_col][src_row].release()
+                self.gridLocks[dest_col][dest_row].release()
+                print("successfully released the locks")
         else:
+            print("in else, locks timeout")
             return False
-        
-        # check if your destination is a piece of the same color
-        if self.grid[dest_col][dest_row]:
-            if self.grid[dest_col][dest_row].color == self.grid[src_col][src_row].color:
-                return False # friendly fire
-        
-        # Successful move
-        if self.grid[dest_col][dest_row]:
-            self.captured.append(self.grid[dest_col][dest_row].toString())
-        self.grid[dest_col][dest_row] = self.grid[src_col][src_row]
-        self.grid[src_col][src_row] = None
-        self.grid[dest_col][dest_row].updateTimer(time.perf_counter())
-        self.winner = possible_winner
-        
-        # if the king or rook have moved
-        if isinstance(self.grid[dest_col][dest_row], King) or \
-           isinstance(self.grid[dest_col][dest_row], Rook):
-           self.grid[dest_col][dest_row].hasMoved = True
-        return True
     
     def click(self, click_coordinates, playerColor):
         (click_col, click_row) = click_coordinates
         if self.grid[click_col][click_row] and self.grid[click_col][click_row].color == playerColor:
-            print("clicked on a piece of the same color!")
             return self.grid[click_col][click_row]
         
     def capturedPieces(self):

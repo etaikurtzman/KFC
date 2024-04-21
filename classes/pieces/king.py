@@ -16,8 +16,7 @@ class King(Piece):
     def can_move(self, src, dest):
         (src_col, src_row) = src
         (dest_col, dest_row) = dest
-        if src == dest:
-            return False
+        
         return ((abs(src_col - dest_col)) < 2 and (abs(src_row - dest_row) < 2))
     
     def can_castle(self, src, dest):

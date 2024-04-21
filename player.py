@@ -36,59 +36,78 @@ class Player:
         self.screen = pygame.display.set_mode([BOARD_LENGTH, BOARD_LENGTH])
         self.length = 8
         self.pixelLength = BOARD_LENGTH
+        # self.winner = False
         self.draggedPiece = None
         self.clickedPiece = False
         self.draggingPiece = False
+        self.otherPiece = False
 
     def getUpdatesLoop(self):
         # message_counter = 2
         while True:
-            msg = self.network.receive()
-            if msg[0:5] == "white":
-                self.screen.fill('yellow')
-                self.draw_board()
-                self.draw_pieces(msg[5:])
-                font = pygame.font.Font(None, 100) #100 font size
-                text = font.render('White Wins!', True, (50, 50, 255)) #bluish
-                self.screen.blit(text, (200, 325))
-                pygame.display.update()
-                break
-            elif msg[0:5] == "black":
-                self.screen.fill('yellow')
-                self.draw_board()
-                self.draw_pieces(msg[5:])
-                font = pygame.font.Font(None, 100) #100 font size
-                text = font.render('Black Wins!', True, (50, 50, 255)) #bluish
-                self.screen.blit(text, (200, 325))
-                pygame.display.update()
-                break
-            elif msg == "Quit":
-                break
-            elif msg.startswith("CLICKED:"):
-                (clicked_coordinates, clicked_piece) = eval(msg[len("CLICKED:"):])
-                self.draggingPiece = piece_images.get(clicked_piece)
-                
-                (click_x, click_y) = clicked_coordinates
-                self.clickedPiece = True
-            elif msg.startswith("END:"):
-                dragged_coordinates = eval(msg[len("END:"):])
-                
-                (dragged_x, dragged_y) = dragged_coordinates
-                self.draggedPiece = True
-            else:
-                board = msg
-            
-            self.screen.fill('yellow')
-            self.draw_board()
-            if self.clickedPiece == True :
-                self.draw_clicked_and_dragged_squares(click_x, click_y, 'cyan')
-            if self.draggedPiece == True:
-                self.draw_clicked_and_dragged_squares(dragged_x, dragged_y, 'blue')   
-            self.draw_pieces(board)
-            
-            pygame.draw.circle(self.screen, (200, 0, 255), (BOARD_LENGTH - 250, BOARD_LENGTH - 250), 75)
-            
-            pygame.display.update()
+            # if self.winner:
+            #     break
+            mailbox = self.network.receive()
+            msgs = mailbox.split('|')
+            for msg in msgs:
+                if msg != '':
+                    print("in player msg is:", msg)
+                    if msg[0:5] == "white":
+                        self.screen.fill('yellow')
+                        self.draw_board()
+                        self.draw_pieces(msg[5:])
+                        font = pygame.font.Font(None, 100) #100 font size
+                        text = font.render('White Wins!', True, (50, 50, 255)) #bluish
+                        self.screen.blit(text, (200, 325))
+                        pygame.display.update()
+                        # self.winner = True
+                        break
+                    elif msg[0:5] == "black":
+                        self.screen.fill('yellow')
+                        self.draw_board()
+                        self.draw_pieces(msg[5:])
+                        font = pygame.font.Font(None, 100) #100 font size
+                        text = font.render('Black Wins!', True, (50, 50, 255)) #bluish
+                        self.screen.blit(text, (200, 325))
+                        pygame.display.update()
+                        # self.winner = True
+                        break
+                    elif msg == "Quit":
+                        break
+                    elif msg.startswith("CLICKED:"):
+                        (clicked_coordinates, clicked_piece) = eval(msg[len("CLICKED:"):])
+                        self.draggingPiece = piece_images.get(clicked_piece)
+                        
+                        (click_x, click_y) = clicked_coordinates
+                        self.clickedPiece = True
+                    elif msg.startswith("END:"):
+                        dragged_coordinates = eval(msg[len("END:"):])
+                        
+                        (dragged_x, dragged_y) = dragged_coordinates
+                        self.draggedPiece = True
+                    elif msg.startswith("END-OTHER:"):
+                        print("got move from other player!")
+                        other_coordinates = eval(msg[len("END-OTHER:"):])
+                        print("other coordinates are: ", other_coordinates)
+                        (other_x, other_y) = other_coordinates
+                        self.otherPiece = True
+                    else:
+                        board = msg
+                    
+                    self.screen.fill('yellow')
+                    self.draw_board()
+                    if self.clickedPiece == True:
+                        self.draw_clicked_and_dragged_squares(click_x, click_y, 'cyan')
+                    if self.draggedPiece == True:
+                        self.draw_clicked_and_dragged_squares(dragged_x, dragged_y, 'blue')
+                    if self.otherPiece == True:
+                        print("in drawing other squares")
+                        self.draw_clicked_and_dragged_squares(other_x, other_y, 'turquoise') 
+                    self.draw_pieces(board)
+                    
+                    pygame.draw.circle(self.screen, (200, 0, 255), (BOARD_LENGTH - 250, BOARD_LENGTH - 250), 75)
+                    
+                    pygame.display.update()
 
     def getMovesLoop(self):
         running = True

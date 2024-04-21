@@ -18,8 +18,6 @@ class Pawn(Piece):
     def can_move(self, src, dest):
         (src_col, src_row) = src
         (dest_col, dest_row) = dest
-        if src == dest:
-            return False
         
         if self.color == 'white':
             if src_row == 6:

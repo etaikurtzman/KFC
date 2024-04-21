@@ -16,8 +16,7 @@ class Rook(Piece):
     def can_move(self, src, dest):
         (src_col, src_row) = src
         (dest_col, dest_row) = dest
-        if src == dest:
-            return False
+
         return (src_col == dest_col or src_row == dest_row)
 
     # Assumes given move can be valid
