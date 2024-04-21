@@ -49,6 +49,8 @@ class Board:
             self.grid[i][6] = Pawn(PIECE_LIGHT_COLOR)
 
         self.startTime = None
+        
+        self.captured = []
     
     def start_timer(self):
         self.startTime = time.perf_counter()
@@ -98,6 +100,7 @@ class Board:
                             self.grid[dest_col][dest_row].updateTimer(time.perf_counter())  # Successful pawn move
                         self.grid[src_col][src_row] = None
                         self.winner = possible_winner
+                        self.captured.append(self.grid[dest_col][dest_row].toString())
                     return True
                 else:
                     return False
@@ -167,7 +170,9 @@ class Board:
             if self.grid[dest_col][dest_row].color == self.grid[src_col][src_row].color:
                 return False # friendly fire
         
-        # Successful movead
+        # Successful move
+        if self.grid[dest_col][dest_row]:
+            self.captured.append(self.grid[dest_col][dest_row].toString())
         self.grid[dest_col][dest_row] = self.grid[src_col][src_row]
         self.grid[src_col][src_row] = None
         self.grid[dest_col][dest_row].updateTimer(time.perf_counter())
@@ -184,6 +189,9 @@ class Board:
         if self.grid[click_col][click_row] and self.grid[click_col][click_row].color == playerColor:
             print("clicked on a piece of the same color!")
             return self.grid[click_col][click_row]
+        
+    def capturedPieces(self):
+        return self.captured
         
     def grid_to_string(self):     
         #print("in grid to string")   
