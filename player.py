@@ -1,7 +1,3 @@
-# player.py
-# 
-# 
-
 from network import Network
 import pygame
 import threading
@@ -40,11 +36,14 @@ class Player:
         self.screen = pygame.display.set_mode([BOARD_LENGTH, BOARD_LENGTH])
         self.length = 8
         self.pixelLength = BOARD_LENGTH
+        self.draggedPiece = None
+        self.clickedPiece = False
+        self.draggingPiece = False
 
     def getUpdatesLoop(self):
+        # message_counter = 2
         while True:
             msg = self.network.receive()
-            #print(msg)
             if msg[0:5] == "white":
                 self.screen.fill('yellow')
                 self.draw_board()
@@ -65,9 +64,26 @@ class Player:
                 break
             elif msg == "Quit":
                 break
-            board = msg
+            elif msg.startswith("CLICKED:"):
+                (clicked_coordinates, clicked_piece) = eval(msg[len("CLICKED:"):])
+                self.draggingPiece = piece_images.get(clicked_piece)
+                
+                (click_x, click_y) = clicked_coordinates
+                self.clickedPiece = True
+            elif msg.startswith("END:"):
+                dragged_coordinates = eval(msg[len("END:"):])
+                
+                (dragged_x, dragged_y) = dragged_coordinates
+                self.draggedPiece = True
+            else:
+                board = msg
+            
             self.screen.fill('yellow')
             self.draw_board()
+            if self.clickedPiece == True :
+                self.draw_clicked_and_dragged_squares(click_x, click_y, 'cyan')
+            if self.draggedPiece == True:
+                self.draw_clicked_and_dragged_squares(dragged_x, dragged_y, 'blue')   
             self.draw_pieces(board)
             
             pygame.draw.circle(self.screen, (200, 0, 255), (BOARD_LENGTH - 250, BOARD_LENGTH - 250), 75)
@@ -81,7 +97,6 @@ class Player:
                 if event.type == pygame.QUIT:
                     running = False
                     self.network.sendMove("Quit")
-                    # self.stop_event.set()
                 
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     if event.button == 1:
@@ -91,7 +106,8 @@ class Player:
                             mouse_x = BOARD_LENGTH - 1 - mouse_x
                             mouse_y = BOARD_LENGTH - 1 - mouse_y
                         start = (mouse_x // (BOARD_LENGTH // 8), mouse_y // (BOARD_LENGTH // 8))
-                        #print(start)
+                        if start:
+                            self.network.sendClick(str(start))
                 
                 if event.type == pygame.MOUSEBUTTONUP:
                     if event.button == 1:
@@ -101,16 +117,12 @@ class Player:
                             mouse_x = BOARD_LENGTH - 1 - mouse_x
                             mouse_y = BOARD_LENGTH - 1 - mouse_y
                         end = (mouse_x // (BOARD_LENGTH // 8), mouse_y // (BOARD_LENGTH // 8))
-                        #print(end)
                         if start and end:
                             self.network.sendMove(str((start, end)))
-                        #print("move sent")
                         start = None
                         end = None
         pygame.quit()
         
-
-
 
     def draw_pieces(self, encoded_board):
         decoded_board = encoded_board.split(',')
@@ -131,6 +143,15 @@ class Player:
                 if ((i + j) % 2 == 1):
                     square_dim = BOARD_LENGTH / 8
                     pygame.draw.rect(self.screen, 'orange', (i * square_dim, j * square_dim, BOARD_LENGTH / 8, BOARD_LENGTH / 8))
+    
+    def draw_clicked_and_dragged_squares(self, x, y, color):
+        if self.color == "black":
+            screen_x = (7 - x) * (BOARD_LENGTH / 8)
+            screen_y = (7 - y) * (BOARD_LENGTH / 8)
+        if self.color == "white":
+            screen_x = x * (BOARD_LENGTH / 8)
+            screen_y = y * (BOARD_LENGTH / 8)
+        pygame.draw.rect(self.screen, color, (screen_x, screen_y, BOARD_LENGTH / 8, BOARD_LENGTH / 8))
 
 if __name__ == '__main__':
     main()

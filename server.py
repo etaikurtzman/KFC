@@ -49,21 +49,25 @@ def client_loop(conn1, conn2, playerColor, board):
     while True:
         try:
             msg = conn1.recv(2048).decode()
-            # print(msg)
+            
             if msg == "Quit":
                 conn1.sendall(str.encode("Quit"))
                 break
-            start, end = eval(msg)
-            # print("entering board.move")
-            board.move(start, end, playerColor)
-            # print("out of board.move")
-            tosend = (board.grid_to_string())
-            # print(tosend)
-            # print(conn1, conn2)
-            conn1.sendall(str.encode(tosend))
-            # print("sent to conn 1")
-            conn2.sendall(str.encode(tosend))
-            # print("sent updated boards")
+            if msg.startswith("MOVE:"):
+                move = msg[len("MOVE:"):]
+                start, end = eval(move)
+                if board.move(start, end, playerColor):
+                    conn1.send(str.encode("END:" + str(end)))
+                tosend = (board.grid_to_string())
+                conn1.sendall(str.encode(tosend))
+                conn2.sendall(str.encode(tosend))
+            if msg.startswith("CLICK:"):
+                click = eval(msg[len("CLICK:"):])
+                clicked_piece = board.click(click, playerColor)
+                if clicked_piece:
+                    tosend = (click, clicked_piece.toString())
+                    conn1.sendall(str.encode("CLICKED:" + str(tosend)))
+            
         except:
             break
 

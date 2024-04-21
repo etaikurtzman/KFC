@@ -16,4 +16,7 @@ class Network:
         return self.client.recv(2048).decode()
     
     def sendMove(self, move):
-        self.client.send(str.encode(move))
+        self.client.send(str.encode("MOVE:" + move))
+        
+    def sendClick(self, start):
+        self.client.send(str.encode("CLICK:" + start))
