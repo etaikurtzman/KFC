@@ -8,6 +8,7 @@ MAX_USERS = 2
 
 def main():
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 
     server = input("Enter your IPv4: ")
     port = 5555
@@ -42,6 +43,8 @@ def main():
         thread.start()
     for thread in threads:
         thread.join()
+
+    s.close()
 
 def client_loop(conn1, conn2, playerColor, board):
     conn1.send(str.encode(playerColor))
