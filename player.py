@@ -5,18 +5,18 @@ import threading
 BOARD_LENGTH = 800
 
 piece_images = {
-            'wb': pygame.transform.scale(pygame.image.load('imgs/w_bishop.png'), (100, 100)),
-            'bb': pygame.transform.scale(pygame.image.load('imgs/b_bishop.png'), (100, 100)),
-            'wk': pygame.transform.scale(pygame.image.load('imgs/w_king.png'), (100, 100)),
-            'bk': pygame.transform.scale(pygame.image.load('imgs/b_king.png'), (100, 100)),
-            'wn': pygame.transform.scale(pygame.image.load('imgs/w_knight.png'), (100, 100)),
-            'bn': pygame.transform.scale(pygame.image.load('imgs/b_knight.png'), (100, 100)),
-            'wp': pygame.transform.scale(pygame.image.load('imgs/w_pawn.png'), (100, 100)),
-            'bp': pygame.transform.scale(pygame.image.load('imgs/b_pawn.png'), (100, 100)),
-            'wq': pygame.transform.scale(pygame.image.load('imgs/w_queen.png'), (100, 100)),
-            'bq': pygame.transform.scale(pygame.image.load('imgs/b_queen.png'), (100, 100)),
-            'wr': pygame.transform.scale(pygame.image.load('imgs/w_rook.png'), (100, 100)),
-            'br': pygame.transform.scale(pygame.image.load('imgs/b_rook.png'), (100, 100))
+            'wb': pygame.transform.scale(pygame.image.load('imgs/wB.svg'), (100, 100)),
+            'bb': pygame.transform.scale(pygame.image.load('imgs/bB.svg'), (100, 100)),
+            'wk': pygame.transform.scale(pygame.image.load('imgs/wK.svg'), (100, 100)),
+            'bk': pygame.transform.scale(pygame.image.load('imgs/bK.svg'), (100, 100)),
+            'wn': pygame.transform.scale(pygame.image.load('imgs/wK.svg'), (100, 100)),
+            'bn': pygame.transform.scale(pygame.image.load('imgs/bK.svg'), (100, 100)),
+            'wp': pygame.transform.scale(pygame.image.load('imgs/wP.svg'), (100, 100)),
+            'bp': pygame.transform.scale(pygame.image.load('imgs/bP.svg'), (100, 100)),
+            'wq': pygame.transform.scale(pygame.image.load('imgs/wQ.svg'), (100, 100)),
+            'bq': pygame.transform.scale(pygame.image.load('imgs/bQ.svg'), (100, 100)),
+            'wr': pygame.transform.scale(pygame.image.load('imgs/wR.svg'), (100, 100)),
+            'br': pygame.transform.scale(pygame.image.load('imgs/bR.svg'), (100, 100))
         }
 
 def main():
@@ -57,7 +57,7 @@ class Player:
                         self.draw_board()
                         self.draw_pieces(msg[5:])
                         font = pygame.font.Font(None, 100) #100 font size
-                        text = font.render('White Wins!', True, (50, 50, 255)) #bluish
+                        text = font.render('White Wins!', True, (255, 0, 53)) #redish
                         self.screen.blit(text, (200, 325))
                         pygame.display.update()
                         # self.winner = True
@@ -67,7 +67,7 @@ class Player:
                         self.draw_board()
                         self.draw_pieces(msg[5:])
                         font = pygame.font.Font(None, 100) #100 font size
-                        text = font.render('Black Wins!', True, (50, 50, 255)) #bluish
+                        text = font.render('Black Wins!', True, (255, 0, 53)) #redish
                         self.screen.blit(text, (200, 325))
                         pygame.display.update()
                         # self.winner = True
@@ -105,8 +105,6 @@ class Player:
                             print("in drawing other squares")
                             self.draw_clicked_and_dragged_squares(other_x, other_y, 'turquoise') 
                         self.draw_pieces(board)
-                        
-                        pygame.draw.circle(self.screen, (200, 0, 255), (BOARD_LENGTH - 250, BOARD_LENGTH - 250), 75)
                         
                         pygame.display.update()
 
@@ -158,12 +156,12 @@ class Player:
                 index += 1
 
     def draw_board(self):
-        self.screen.fill('yellow')
+        self.screen.fill((145, 184, 194))
         for i in range(0, 8):
             for j in range(0, 8):
                 if ((i + j) % 2 == 1):
                     square_dim = BOARD_LENGTH / 8
-                    pygame.draw.rect(self.screen, 'orange', (i * square_dim, j * square_dim, BOARD_LENGTH / 8, BOARD_LENGTH / 8))
+                    pygame.draw.rect(self.screen, (65,104,130), (i * square_dim, j * square_dim, BOARD_LENGTH / 8, BOARD_LENGTH / 8))
     
     def draw_clicked_and_dragged_squares(self, x, y, color):
         if self.color == "black":
