@@ -107,6 +107,7 @@ class Player:
                     elif msg.startswith("CLICKED:"):
                         (clicked_coordinates, clicked_piece) = eval(msg[len("CLICKED:"):])
                         self.draggingPiece = piece_images.get(clicked_piece)
+                        print("piece just returned is: ", self.draggingPiece)
                         
                         self.clickedPiece = True
                         self.clickedCoordinates = clicked_coordinates
