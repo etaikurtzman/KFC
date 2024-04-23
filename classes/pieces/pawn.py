@@ -4,7 +4,6 @@ from classes.piece import Piece
 class Pawn(Piece):
     def __init__(self, color):
         super().__init__(color)
-        self.cooldown = 1.0
 
     def toString(self):
         if self.color == 'white':

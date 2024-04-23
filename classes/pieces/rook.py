@@ -4,7 +4,6 @@ class Rook(Piece):
     def __init__(self, color):
         super().__init__(color)
         self.hasMoved = False
-        self.cooldown = 4.0
 
     def toString(self):
         if self.color == 'white':
