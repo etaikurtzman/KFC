@@ -61,7 +61,10 @@ def client_loop(conn1, conn2, playerColor, board):
                 move = msg[len("MOVE:"):]
                 start, end = eval(move)
                 if board.move(start, end, playerColor):
-                    conn1.send(str.encode("END:" + str(end) + '|'))
+                    print("in server, end is: ", end)
+                    cooldown_str = board.getCooldownString(end)
+                    print("in server, cooldown is: ", cooldown_str)
+                    conn1.send(str.encode("END:" + str(end) + ';' + cooldown_str + '|'))
                     conn2.send(str.encode("END-OTHER:" + str(end) + '|'))
                 tosend = (board.grid_to_string())
                 conn1.send(str.encode(str(tosend) + '|'))

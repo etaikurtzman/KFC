@@ -15,3 +15,6 @@ class Piece:
             #print(time - self.lastMoved)
             return time - self.lastMoved < self.cooldown
         return False
+    
+    def getCooldown(self):
+        return self.cooldown

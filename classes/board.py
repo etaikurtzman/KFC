@@ -240,3 +240,8 @@ class Board:
             return self.winner + s
         else:
             return s
+
+    def getCooldownString(self, end):
+        col, row = end
+        return str(self.grid[col][row].getCooldown())
+        
