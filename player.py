@@ -79,7 +79,6 @@ class Player:
             for msg in msgs:
                 # print("msg is: ", msg)
                 if msg != '':
-                    print("in player msg is:", msg)
                     if msg[0:5] == "white":
                         self.screen.fill('yellow')
                         self.draw_board()
@@ -105,25 +104,20 @@ class Player:
                     elif msg == "Quit":
                         running = False
                     elif msg.startswith("CLICKED:"):
-                        (clicked_coordinates, clicked_piece) = eval(msg[len("CLICKED:"):])
-                        self.draggingPiece = piece_images.get(clicked_piece)
-                        print("piece just returned is: ", self.draggingPiece)
+                        clicked_coordinates= eval(msg[len("CLICKED:"):])
                         
                         self.clickedPiece = True
                         self.clickedCoordinates = clicked_coordinates
                     elif msg.startswith("END:"):
-                        print("in END message receive")
                         msgs = msg[len("END:"):].split(';')
-                        print("in END: msgs is: ", msgs)
                         
                         dragged_coordinates = eval(msgs[0])
-                        print("dragged_coordinates: ", dragged_coordinates)
                         cooldown = float(msgs[1])
-                        print("cooldown: ", cooldown)
+                        piece = msgs[2]
                         
-                        print("before lock in getUpdates")
+                        self.draggingPiece = piece
+                        
                         with self.cooldown_lock:
-                            print("in lock in getUpdates")
                             self.pieceCooldowns.append(self.get_grid_coordinates(dragged_coordinates[0], dragged_coordinates[1]))
                             
                         cooldown_thread = threading.Thread(target=self.cooldown_timer, args=[cooldown, self.get_grid_coordinates(dragged_coordinates[0], dragged_coordinates[1])])
@@ -133,11 +127,9 @@ class Player:
                         self.draggedCoordinates = dragged_coordinates
                     elif msg.startswith("END-OTHER:"):
                         other_coordinates = eval(msg[len("END-OTHER:"):])
-                        print("other_coordinates: ", other_coordinates)
                         self.otherPiece = True
                         self.otherCoordinates = other_coordinates
                         if other_coordinates in self.pieceCooldowns:
-                            print("if other is in cooldown list")
                             self.pieceCooldowns.remove(other_coordinates)
                     else:
                         board = msg
@@ -196,29 +188,21 @@ class Player:
                         start = None
                         end = None
         pygame.quit()
-        print("quitting getmovesloop")
     
     def cooldown_timer(self, cooldown_time, piece_coordinates):
-        print("cooldown timer thread started")
-        print("self.pieceCooldown[] before sleep:", self.pieceCooldowns)
         time.sleep(cooldown_time)
         print()
         
         with self.cooldown_lock:
-            print("in lock")
             if piece_coordinates in self.pieceCooldowns and (not self.winner): 
-                print("in thread, making sure piece is still in the cooldown list")
                 self.pieceCooldowns.remove(piece_coordinates)
                 self.draw_board()
 
                 self.draw_dragged()
                 self.draw_clicked()
                 self.draw_other()
-                print("before thread calls draw_pieces")
                 self.draw_pieces()
-                print("after thread calls draw pieces")
                 pygame.display.update()
-                print("self.pieceCooldown[] after sleep:", self.pieceCooldowns)
 
         
     def draw_clicked(self):
@@ -252,7 +236,6 @@ class Player:
         return (grid_x, grid_y)
 
     def draw_pieces(self):
-        print("in draw_pieces")
         decoded_board = self.current_encoded_board.split(',')
         if self.color == "black":
             decoded_board.reverse()
@@ -262,13 +245,9 @@ class Player:
         for i in range(self.length):
             for j in range(self.length):
                 pieceincooldown = (i, j) in self.pieceCooldowns
-                #print("self.pieceCooldowns is: ", self.pieceCooldowns)
-                #print("(i, j) is: ", (i, j))
                 if decoded_board[index] != ".":
                     if pieceincooldown:
-                        #print("in draw_pieces, if cooldown piece")
                         piece_image = cool_piece_images.get(decoded_board[index])
-                        #print("piece_image is:", piece_image)
                     else:
                         piece_image = piece_images.get(decoded_board[index])
                     self.screen.blit(piece_image, ((i * (self.pixelLength // self.length)), (j * (self.pixelLength // self.length))))

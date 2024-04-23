@@ -53,28 +53,24 @@ def client_loop(conn1, conn2, playerColor, board):
         try:
             msg = conn1.recv(2048).decode()
             if msg == "QUIT":
-                print("got message to quit")
                 conn1.send(str.encode("Quit" + '|'))
                 conn1.close()
                 break
             if msg.startswith("MOVE:"):
                 move = msg[len("MOVE:"):]
                 start, end = eval(move)
-                if board.move(start, end, playerColor):
-                    print("in server, end is: ", end)
+                piece = board.move(start, end, playerColor)
+                if piece:
                     cooldown_str = board.getCooldownString(end)
-                    print("in server, cooldown is: ", cooldown_str)
-                    conn1.send(str.encode("END:" + str(end) + ';' + cooldown_str + '|'))
+                    conn1.send(str.encode("END:" + str(end) + ';' + cooldown_str + ';' + str(piece) + '|'))
                     conn2.send(str.encode("END-OTHER:" + str(end) + '|'))
                 tosend = (board.grid_to_string())
                 conn1.send(str.encode(str(tosend) + '|'))
                 conn2.send(str.encode(str(tosend) + '|'))
             if msg.startswith("CLICK:"):
                 click = eval(msg[len("CLICK:"):])
-                clicked_piece = board.click(click, playerColor)
-                if clicked_piece:
-                    tosend = (click, clicked_piece.toString())
-                    conn1.send(str.encode("CLICKED:" + str(tosend) + '|'))
+                if board.click(click, playerColor):
+                    conn1.send(str.encode("CLICKED:" + str(click) + '|'))
             
         except:
             conn1.close()

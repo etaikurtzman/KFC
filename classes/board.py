@@ -70,19 +70,19 @@ class Board:
             try:
                 # If trying to move a piece from an empty square
                 if not self.grid[src_col][src_row]:
-                    return False # no piece at origin
+                    return None # no piece at origin
                 
 
                 # ensure player is moving their own piece
                 if playerColor != self.grid[src_col][src_row].color:
-                    return False
+                    return None
                 
                 
                 
                 # checks if the piece moved recently
                 # print(time.perf_counter())
                 if self.grid[src_col][src_row].movedRecently(time.perf_counter()):
-                    return False
+                    return None
                 # print("hello")
                 # checking if destination is the king, if so winner is set
                 possible_winner = None
@@ -106,9 +106,9 @@ class Board:
                                 self.grid[src_col][src_row] = None
                                 self.winner = possible_winner
                                 self.captured.append(self.grid[dest_col][dest_row].toString())
-                            return True
+                            return self.grid[dest_col][dest_row].toString()
                         else:
-                            return False
+                            return None
                 
                 # If trying to move a king
                 if isinstance(self.grid[src_col][src_row], King):
@@ -182,21 +182,21 @@ class Board:
                                     self.gridLocks[5][0].release()
                                     self.gridLocks[7][0].release()
                         
-                        return True
+                        return self.grid[dest_col][dest_row].toString()
 
                 # check if there's a piece in the way
                 if (self.grid[src_col][src_row].can_move(src, dest)):
                     passed = self.grid[src_col][src_row].pass_through(src, dest)
                     for (i,j) in passed:
                         if self.grid[i][j]:
-                            return False # piece in the way
+                            return None # piece in the way
                 else:
-                    return False
+                    return None
                 
                 # check if your destination is a piece of the same color
                 if self.grid[dest_col][dest_row]:
                     if self.grid[dest_col][dest_row].color == self.grid[src_col][src_row].color:
-                        return False # friendly fire
+                        return None # friendly fire
                 
                 # Successful move
                 if self.grid[dest_col][dest_row]:
@@ -211,18 +211,18 @@ class Board:
                   isinstance(self.grid[dest_col][dest_row], Rook):
                   self.grid[dest_col][dest_row].hasMoved = True
                 
-                return True
+                return self.grid[dest_col][dest_row].toString()
             
             finally:
                 self.gridLocks[src_col][src_row].release()
                 self.gridLocks[dest_col][dest_row].release()
         else:
-            return False
+            return None
     
     def click(self, click_coordinates, playerColor):
         (click_col, click_row) = click_coordinates
         if self.grid[click_col][click_row] and self.grid[click_col][click_row].color == playerColor:
-            return self.grid[click_col][click_row]
+            return True
         
     def capturedPieces(self):
         return self.captured
