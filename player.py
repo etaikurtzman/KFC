@@ -53,7 +53,7 @@ class Player:
         self.screen = pygame.display.set_mode([BOARD_LENGTH, BOARD_LENGTH])
         self.length = 8
         self.pixelLength = BOARD_LENGTH
-        # self.winner = False
+        self.winner = False
         self.draggedPiece = None
         
         self.clickedPiece = False
@@ -89,7 +89,7 @@ class Player:
                         text = font.render('White Wins!', True, (255, 0, 53)) #redish
                         self.screen.blit(text, (200, 325))
                         pygame.display.update()
-                        # self.winner = True
+                        self.winner = True
                         running = False
                     elif msg[0:5] == "black":
                         self.screen.fill('yellow')
@@ -100,7 +100,7 @@ class Player:
                         text = font.render('Black Wins!', True, (255, 0, 53)) #redish
                         self.screen.blit(text, (200, 325))
                         pygame.display.update()
-                        # self.winner = True
+                        self.winner = True
                         running = False
                     elif msg == "Quit":
                         running = False
@@ -167,6 +167,7 @@ class Player:
                 if event.type == pygame.QUIT:
                     running = False
                     self.network.sendQuit()
+                    break
                 
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     if event.button == 1:
@@ -204,7 +205,7 @@ class Player:
         
         with self.cooldown_lock:
             print("in lock")
-            if piece_coordinates in self.pieceCooldowns: 
+            if piece_coordinates in self.pieceCooldowns and (not self.winner): 
                 print("in thread, making sure piece is still in the cooldown list")
                 self.pieceCooldowns.remove(piece_coordinates)
                 self.draw_board()

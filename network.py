@@ -13,7 +13,10 @@ class Network:
         return self.color
 
     def receive(self):
-        return self.client.recv(2048).decode()
+        try:
+            return self.client.recv(2048).decode()
+        except:
+            print("Network error: unable to connect")
     
     def sendMove(self, move):
         self.client.send(str.encode("MOVE:" + move))
