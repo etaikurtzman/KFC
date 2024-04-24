@@ -109,6 +109,12 @@ class Board:
                             return self.grid[dest_col][dest_row].toString()
                         else:
                             return None
+                    elif dest_row == 0 or dest_row == 7:
+                        self.grid[dest_col][dest_row] = Queen(playerColor)
+                        self.grid[dest_col][dest_row].updateTimer(time.perf_counter()) # Successful pawn move (promotion to queen)
+                        self.grid[src_col][src_row] = None
+                        self.winner = possible_winner
+                        return self.grid[dest_col][dest_row].toString()
                 
                 # If trying to move a king
                 if isinstance(self.grid[src_col][src_row], King):
