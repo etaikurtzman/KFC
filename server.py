@@ -33,10 +33,12 @@ def main():
         print("Connected to: ", addr)
         conns.append(conn)
         numPlayers += 1
-    
+
+    num_start_clicks = [0]
+
     board.start_timer() # tells the board to start timing
-    thread1 = threading.Thread(target=client_loop, args=[conns[0], conns[1], colors[0], board])
-    thread2 = threading.Thread(target=client_loop, args=[conns[1], conns[0], colors[1], board])
+    thread1 = threading.Thread(target=client_loop, args=[conns[0], conns[1], colors[0], board, num_start_clicks])
+    thread2 = threading.Thread(target=client_loop, args=[conns[1], conns[0], colors[1], board, num_start_clicks])
     
     threads = [thread1, thread2]
     for thread in threads:
@@ -46,7 +48,7 @@ def main():
 
     s.close()
 
-def client_loop(conn1, conn2, playerColor, board):
+def client_loop(conn1, conn2, playerColor, board, num_start_clicks):
     conn1.send(str.encode(playerColor))
     conn1.send(str.encode(board.grid_to_string()))
     while True:
@@ -71,6 +73,16 @@ def client_loop(conn1, conn2, playerColor, board):
                 click = eval(msg[len("CLICK:"):])
                 if board.click(click, playerColor):
                     conn1.send(str.encode("CLICKED:" + str(click) + '|'))
+            if msg == "START":
+                print("in server, got message")
+                num_start_clicks[0] += 1
+                print("num_start_clicks is: ", num_start_clicks)
+
+                if num_start_clicks[0] == 2:
+                    print("2 players joined!")
+                    conn1.send(str.encode("READY:"))
+                    conn2.send(str.encode("READY:"))
+                
             
         except:
             conn1.close()

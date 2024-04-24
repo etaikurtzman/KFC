@@ -26,3 +26,6 @@ class Network:
     
     def sendQuit(self):
         self.client.send(str.encode("QUIT"))
+
+    def sendStart(self):
+        self.client.send(str.encode("START"))
