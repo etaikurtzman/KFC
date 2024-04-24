@@ -106,7 +106,9 @@ class Board:
                                 self.grid[src_col][src_row] = None
                                 self.winner = possible_winner
                                 self.captured.append(self.grid[dest_col][dest_row].toString())
-                            return self.grid[dest_col][dest_row].toString()
+                                return self.grid[dest_col][dest_row].toString()
+                            else:
+                                return None
                         else:
                             return None
                     elif dest_row == 0 or dest_row == 7:

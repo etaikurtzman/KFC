@@ -191,7 +191,7 @@ class Player:
     
     def cooldown_timer(self, cooldown_time, piece_coordinates):
         time.sleep(cooldown_time)
-        print()
+        print("Cooldown timer happening")
         
         with self.cooldown_lock:
             if piece_coordinates in self.pieceCooldowns and (not self.winner): 
