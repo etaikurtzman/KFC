@@ -1,5 +1,5 @@
 import pygame
-from classes.piece import Piece
+from piece import Piece
 class Rook(Piece):
     def __init__(self, color):
         super().__init__(color)

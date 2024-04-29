@@ -1,11 +1,11 @@
 import pygame
 import threading
-from classes.pieces.bishop import Bishop
-from classes.pieces.rook import Rook
-from classes.pieces.knight import Knight
-from classes.pieces.king import King
-from classes.pieces.pawn import Pawn
-from classes.pieces.queen import Queen
+from pieces.bishop import Bishop
+from pieces.rook import Rook
+from pieces.knight import Knight
+from pieces.king import King
+from pieces.pawn import Pawn
+from pieces.queen import Queen
 import time
 
 PIECE_LIGHT_COLOR = 'white'
@@ -245,7 +245,7 @@ class Board:
                     s += ".,"
         s = s[:-1]
         if self.winner:
-            return self.winner + s
+            return self.winner + ":" + s
         else:
             return s
 

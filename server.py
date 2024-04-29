@@ -1,7 +1,7 @@
 import socket
 import threading
 import copy
-from classes.board import Board
+from board import Board
 
 MAX_USERS = 2
 
@@ -64,7 +64,13 @@ def client_loop(conn1, conn2, playerColor, board, num_start_clicks):
                 piece = board.move(start, end, playerColor)
                 if piece:
                     cooldown_str = board.getCooldownString(end)
-                    conn1.send(str.encode("END:" + str(end) + ';' + cooldown_str + ';' + str(piece) + '|'))
+
+                    # NOTE: the string representation of the piece is sent to 
+                    # the player but the player never does anything with it. 
+                    # This is because we returned the piece to do click and drag 
+                    # but were unable to implement it in time before the final 
+                    # submission deadline. 
+                    conn1.send(str.encode("END:" + str(end) + ':' + cooldown_str + ':' + str(piece) + '|'))
                     conn2.send(str.encode("END-OTHER:" + str(end) + '|'))
                 tosend = (board.grid_to_string())
                 conn1.send(str.encode(str(tosend) + '|'))
