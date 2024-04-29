@@ -1,25 +1,61 @@
-import pygame
-import threading
+'''
+board.py
+contains implementation for board class
+represents chess board and handles logic for move validity
+'''
+
+# Imported pieces
 from pieces.bishop import Bishop
 from pieces.rook import Rook
 from pieces.knight import Knight
 from pieces.king import King
 from pieces.pawn import Pawn
 from pieces.queen import Queen
+
+# imported modules
 import time
+import threading
 
 PIECE_LIGHT_COLOR = 'white'
 PIECE_DARK_COLOR  = 'black'
 
+# Length of the grid (number of squares)
+LENGTH = 8
+
 
 class Board:
+    """
+    A class to represent a chess board and chess game logic
+
+    Members
+    -------
+    grid : list(list(Piece))
+        the chess board indexed by col, row where (0,0) is the top left
+        an entry of None represents and empty square
+
+
+    """
     def __init__(self):
-        self.length = 8
+        
+        self.grid = [[None for _ in range(LENGTH)] for _ in range(LENGTH)]
+        
+        self.init_pieces()
+        
+        self.gridLocks = [
+                            [threading.Lock() for _ in range(LENGTH)] 
+                         for _ in range(LENGTH)]
+        
+
+        self.startTime = None
+        
         self.winner = None
 
-        self.grid = [[None for _ in range(8)] for _ in range(8)]
-        self.gridLocks =  [[threading.Lock() for _ in range(8)] for _ in range(8)]
+        self.captured = []
+    
+    def start_timer(self):
+        self.startTime = time.perf_counter()
         
+    def init_pieces(self):
         self.grid[0][0] = Rook(PIECE_DARK_COLOR)
         self.grid[7][0] = Rook(PIECE_DARK_COLOR)
 
@@ -44,17 +80,10 @@ class Board:
         self.grid[3][7] = Queen(PIECE_LIGHT_COLOR)
         self.grid[4][7] = King(PIECE_LIGHT_COLOR)
 
-        for i in range(0, 8):
+        for i in range(0, LENGTH):
             self.grid[i][1] = Pawn(PIECE_DARK_COLOR)
             self.grid[i][6] = Pawn(PIECE_LIGHT_COLOR)
 
-        self.startTime = None
-        
-        self.captured = []
-    
-    def start_timer(self):
-        self.startTime = time.perf_counter()
-        
 
     def move(self, src, dest, playerColor):
         if src == dest:
@@ -237,8 +266,8 @@ class Board:
         
     def grid_to_string(self):     
         s = ""
-        for i in range(self.length):
-            for j in range(self.length):
+        for i in range(LENGTH):
+            for j in range(LENGTH):
                 if self.grid[i][j]:
                     s += (self.grid[i][j].toString() + ",")
                 else:

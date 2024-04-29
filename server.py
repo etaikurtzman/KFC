@@ -1,6 +1,5 @@
 import socket
 import threading
-import copy
 from board import Board
 
 MAX_USERS = 2
