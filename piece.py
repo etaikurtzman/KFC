@@ -62,6 +62,8 @@ class Piece:
         -------
         bool
         """
+        # if the piece has moved determine if the time since is greater than 
+        # cooldown time. If so it can move again. 
         if self.lastMoved:
             return time - self.lastMoved < self.cooldown
         return False

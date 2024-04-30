@@ -20,7 +20,6 @@ from threading import Lock
 # Length of the grid (number of squares)
 LENGTH = 8
 
-
 class Board:
     """
     A class to represent a chess board and chess game logic
@@ -81,8 +80,6 @@ class Board:
                mustBeEmptySquares, playerColor): 
                determines if a castle is possible and performs it if so
     
-
-
     """
     def __init__(self):
         l = LENGTH
@@ -270,6 +267,7 @@ class Board:
                 return self.grid[destCol][destRow].to_string()
             
             finally:
+                # release locks after move has been made
                 self.gridLocks[srcCol][srcRow].release()
                 self.gridLocks[destCol][destRow].release()
         else:
@@ -297,7 +295,9 @@ class Board:
                     
         '''
         (clickCol, clickRow) = clickCoordinates
+        # if a piece exists at the destination
         if self.grid[clickCol][clickRow]:
+            # if there is a piece of the same color
             if self.grid[clickCol][clickRow].color == playerColor:
                 return True
         return False
@@ -318,10 +318,13 @@ class Board:
         for i in range(LENGTH):
             for j in range(LENGTH):
                 if self.grid[i][j]:
+                    # if there is a piece append the string name
                     s += (self.grid[i][j].to_string() + ",")
                 else:
+                    # if there isn't a piece add a period
                     s += ".,"
         s = s[:-1]
+        # if there is a winner append string to the end. 
         if self.winner:
             return self.winner + ":" + s
         else:
@@ -397,6 +400,7 @@ class Board:
                     
         '''
         (destCol, destRow) = dest
+        # if the pawn has reached the end of the board promote it to a queen
         if isinstance(toMove, Pawn):
             if destRow == 0 or destRow == 7:
                 self.grid[destCol][destRow] = Queen(playerColor)
@@ -426,6 +430,7 @@ class Board:
         locks = []
         success = True
         for coord in coordinates:
+            # get the row and col and acquire that lock
             (col, row) = coord
             lock = self.gridLocks[col][row].acquire(timeout=1)
             if not lock:
@@ -451,6 +456,7 @@ class Board:
                 False otherwise
                     
         '''
+        # if the piece is a king, hasn't moved and can castle
         return isinstance(toMove, King)  \
                and (not toMove.hasMoved) \
                and toMove.can_castle(src, dest)
@@ -494,7 +500,7 @@ class Board:
                     (squareCol, squareRow) = square
                     squaresAreEmpty = squaresAreEmpty \
                                   and (not self.grid[squareCol][squareRow])
-
+                # if the piece trying to castle with is a rook of the same color
                 rookPiece = self.grid[rookSrcCol][rookSrcRow]
                 rookIsEligible = isinstance(rookPiece, Rook)    \
                              and rookPiece.color == playerColor \
@@ -512,11 +518,13 @@ class Board:
                     self.grid[rookDestCol][rookDestRow].hasMoved = True
                     self.grid[rookSrcCol][rookSrcRow] = None
             finally:
+                # release the destination square locks
                 for lockingSquare in lockingSquares:
                     (lsCol, lsRow) = lockingSquare
                     self.gridLocks[lsCol][lsRow].release()
                     
         else:
+            # release all locks
             for i in range(len(locks)):
                 if locks[i]:
                     (lsCol, lsRow) = lockingSquares[i]
