@@ -280,6 +280,10 @@ class Player:
             # Update cooldowns corresponding to other player's move
             case "END-OTHER":
                 self.otherCoordinates = eval(msgParts[1])
+                self.otherCoordinates = self.get_grid_coordinates(
+                                                self.otherCoordinates[0], 
+                                                self.otherCoordinates[1]
+                                            )
                 if self.otherCoordinates in self.pieceCooldowns:
                     self.pieceCooldowns.remove(self.otherCoordinates)
             
@@ -637,7 +641,6 @@ class Player:
     def draw_pieces(self):
         """
         Draws the pieces on the board.
-
 
         Parameters
         ----------

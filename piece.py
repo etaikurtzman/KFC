@@ -35,7 +35,7 @@ class Piece:
     def __init__(self, color):
         self.color = color
         self.lastMoved = None
-        self.cooldown = 0.5
+        self.cooldown = 3.0
 
     def update_timer(self, time):
         """
