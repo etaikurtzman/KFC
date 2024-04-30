@@ -1,0 +1,134 @@
+README
+4/29
+
+Overview of Code:
+server.py:
+The computer that is running the server will execute this file. This
+file creates the game board that will be shared between players and runs two
+threads that listen for player moves.
+
+board.py:
+The server will contain one board object that keeps track of the state of the
+game. When the server processes player moves, it will appeal to functions in
+this file to determine whether the move was valid or not. The board contains
+objects of the piece class to represent the individual pieces on the board.
+
+piece.py:
+This file defines the piece class, which is a superclass to represent
+each piece on the board. This class contains each piece's cooldown-related
+information.
+Each of the following files is a subclass of the piece class, and
+includes piece-specific functionality related to the validity of that piece's
+movements.
+    -bishop.py
+    -king.py
+    -knight.py
+    -pawn.py
+    -queen.py
+    -rook.py
+
+player.py:
+Each computer that a player is using will execute this file. This file handles
+the player thread that accepts user input, the loop that listens for board
+updates from the server, and contains draw functions that utilize Pygame
+functionality to display the GUI for each player.
+
+network.py:
+This file provides functionality to create a socket network that a player will
+use to communicate with the server. Each player object will have an instance of
+the network class.
+
+imgs:
+folder containing the PNG images for all white and black pieces as well as the
+cooldown images for each type of piece. 
+
+
+Instructions for Use:
+
+
+Dependencies:
+Python 3.10 or later (check using 'python --version')
+Pygame (install using 'pip install pygame')
+
+1. cd into the project directory; NOT imgs or pieces
+	
+2. Start the server: 
+    In a terminal enter the following command: 
+        python3 server.py
+
+    Enter your computer's IPV4 address after the prompt "Enter your IPv4:"
+            
+    To get your computer's IPV4 address:
+    Windows: open the command prompt and enter "ipconfig".
+
+    Mac: open the terminal and enter "ipconfig getifaddr en0"
+
+    After the IPV4 address is entered the terminal will print the following: 
+        "Waiting for a connection"
+
+    Nothing more needs to be done with the server. 
+
+3. For each player to join:
+    In a terminal enter the following command: 
+        python3 player.py
+
+    Enter the SAME IPV4 address as the server after the prompt: 
+        "Enter the server's IPv4:"
+            
+    The terminal will wait for the other player to connect before displaying the
+    chess window. 
+    
+    Note: Players should be on separate devices, but player and server can be 
+    run on the same device. All devices should be on the same network.
+    
+    Note: Both players should have all code locally
+
+4. To start the game:
+    Once both players have joined the server the window displaying the chess 
+    board will appear for both players.
+
+    To start the game, each player has to click "Start". 
+
+    Once the first player clicks start, the game will wait for the 2nd player to
+    also click start before starting the game. 
+
+    Once the 2nd player has joined a countdown will begin! After the screen 
+    displays "Go!" both players can start making moves. 
+
+5. Rules
+    No turn order:
+
+        Both players can move whenever they want, as often as they want. 
+        They do not need to wait for the other player to make a move. 
+    
+    Piece cooldowns:
+        After a piece has been moved successfully the piece will turn red.
+        The piece is now in cooldown, meaning it cannot be moved again until 
+        after 3 seconds have passed and the piece is no longer red. 
+
+    Capturing the King wins the game. 
+    
+    There is no checking. The game only ends once one of the player's Kings are
+    captured. 
+
+    No en passant
+
+    There IS castling and pawn promotion 
+
+6. Controls: How to move pieces
+    To move a piece: Click and Drag
+    Click on your color piece. If the click is valid then the square behind the
+    piece should turn light blue. 
+
+    Drag the piece to an empty square or a square with an opposing piece 
+    according to the rules of chess. 
+
+    If the move is valid, the piece will move to that square and the square 
+    behind the piece will turn dark blue.
+
+7. Starting a new game
+    Once a player has captured a king the game ends and the server and players
+    will be disconnected. To start another game, start again from step 1.
+
+8. Enjoy!
+
