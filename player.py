@@ -196,6 +196,9 @@ class Player:
         
         self.currentEncodedBoard = None
 
+        self.selfPaused = False
+        self.otherPaused = False
+
     def get_updates_loop(self):
         """
         Continuously listens for updates from the server and processes them.
@@ -286,6 +289,12 @@ class Player:
                                             )
                 if self.otherCoordinates in self.pieceCooldowns:
                     self.pieceCooldowns.remove(self.otherCoordinates)
+
+            case "PAUSED:":
+                self.selfPaused = True
+
+            case "PAUSED-OTHER:":
+                self.otherPaused = True
             
             # Draw the win screen
             case "white" | "black":
@@ -328,6 +337,7 @@ class Player:
                     running = False
                     self.network.send_quit()
                     break
+                
                 # waiting screen is being displayed
                 if self.waiting:
                     pygame.mouse.set_cursor(CURSOR1)
@@ -335,6 +345,23 @@ class Player:
                     self.draw_button(*self.create_button(
                                         "Waiting for other player to join...", 
                                         50))
+                
+                # this player has paused the game
+                if self.selfPaused:
+                    # CHANGE CURSOR!!!!!!!
+                    self.draw_game_state()
+                    self.draw_button(*self.create_button(
+                                        "Game is paused. Resume?", 
+                                        50))
+                
+                # the other player has paused the game
+                if self.otherPaused:
+                    self.draw_game_state()
+                    self.draw_button(*self.create_button(
+                                        "Other player has paused the game. \
+                                        Resume?",
+                                        50))
+
                 # process events
                 else:
                     startPos = self.process_event(event, startPos)
@@ -402,6 +429,11 @@ class Player:
             if startPos and end:
                 self.network.send_move(str((startPos, end)))
             startPos = None
+
+        # On key press
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_p:
+                self.network.send_pause()
 
         return startPos
 

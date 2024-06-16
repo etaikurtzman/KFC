@@ -104,3 +104,15 @@ class Network:
         Sends a start message to the server.
         """
         self.client.send(str.encode("START"))
+    
+    def send_pause(self):
+        """
+        Sends a pause message to the server.
+        """
+        self.client.send(str.encode("PAUSE"))
+    
+    def send_resume(self):
+        """
+        Sends a resume message to the server.
+        """
+        self.client.send(str.encode("RESUME"))

@@ -159,6 +159,18 @@ def client_loop(conn1, conn2, playerColor, board,
                     conn1.send(str.encode(str(tosend) + '|'))
                     conn2.send(str.encode(str(tosend) + '|'))
 
+                case "PAUSE":
+                    conn1.send(str.encode("PAUSED:"))
+                    conn2.send(str.encode("PAUSED-OTHER:"))
+
+                case "RESUME":
+                    with num_start_clicks_lock:
+                        num_start_clicks[0] += 1
+                        # check if both players have clicked resume
+                        if num_start_clicks[0] % 2 == 0:
+                            conn1.send(str.encode("RESUME:"))
+                            conn2.send(str.encode("RESUME:"))
+
                 case "QUIT":
                     # send quit message, close the connection
                     conn1.send(str.encode("Quit" + '|'))
