@@ -236,10 +236,12 @@ class Player:
             msgs = mailbox.split('|')
             for msg in msgs:
                 if msg:
+                    print(f"GOT MESSAGE FROM SERVER: {msg}")
                     self.process_update(msg)
 
                     # Draw the board if there's not a winner
-                    if not self.winner:
+                    if (not self.winner) and (not self.selfPaused) and (not self.otherPaused):
+                        print("in line 244")
                         with self.cooldownLock:
                             self.draw_game_state()
 
@@ -301,18 +303,27 @@ class Player:
                 if self.otherCoordinates in self.pieceCooldowns:
                     self.pieceCooldowns.remove(self.otherCoordinates)
 
-            case "PAUSED:":
+            case "PAUSED":
+                print("GOT PAUSE MESSAGE")
                 self.selfPaused = True
 
-            case "PAUSED-OTHER:":
+            case "PAUSED-OTHER":
+                print("GOT OTHER PAUSED MESSAGE")
                 self.otherPaused = True
+                # self.draw_game_state()
+                # self.draw_button(*self.create_button(
+                #                     "Other player has paused the game. Press 'P' to resume?",
+                #                     50))
+                # self.otherPaused = True
                 
-            case "RESUME:":
+            case "RESUME":
+                print("GOT RESUME")
                 self.waitForResume = False
-                self.draw_game_state()
-                self.draw_button(*self.create_button("Resuming game in:", 50))
-                time.sleep(1)
-                self.draw_countdown()
+                with self.cooldownLock:
+                    self.draw_game_state()
+                    self.draw_button(*self.create_button("Resuming game in:", 50))
+                    time.sleep(1)
+                    self.draw_countdown()
             
             # Draw the win screen
             case "white" | "black":
@@ -365,6 +376,7 @@ class Player:
                                         50))
                     
                 if self.waitForResume:
+                    print("In waitForResume")
                     self.draw_game_state()
                     self.draw_button(*self.create_button(
                                         "Waiting for other player to resume...", 
@@ -378,17 +390,17 @@ class Player:
                 #                         "Game is paused. Resume?", 
                 #                         50))
                 
-                # # the other player has paused the game
-                # if self.otherPaused:
-                #     self.draw_game_state()
-                #     self.draw_button(*self.create_button(
-                #                         "Other player has paused the game. \
-                #                         Resume?",
-                #                         50))
+                # the other player has paused the game
+                if self.otherPaused:
+                    with self.cooldownLock:
+                        self.draw_game_state()
+                        self.draw_button(*self.create_button(
+                                            "Other player has paused the game. Press 'P' to resume?",
+                                            50))
 
                 # process events
-                elif (not self.selfPaused) and (not self.otherPaused):
-                    startPos = self.process_event(event, startPos)
+                # else:
+                startPos = self.process_event(event, startPos)
 
         pygame.quit()
     
@@ -432,17 +444,19 @@ class Player:
                     self.waiting = True
                     self.startScreen = False
             
-            elif self.selfPaused or self.otherPaused:
-                pauseText, pauseButton = self.create_button(
-                                        "Game is paused. Resume?", 
-                                        50)
-                self.draw_button(pauseText, pauseButton)
+            # elif self.selfPaused or self.otherPaused:
+            #     print("In process event, line 437")
+            #     pauseText, pauseButton = self.create_button(
+            #                             "Game is paused. Resume?", 
+            #                             50)
+            #     self.draw_button(pauseText, pauseButton)
                 
-                if pauseButton.collidepoint(event.pos):
-                    self.network.send_resume()
-                    self.selfPaused = False
-                    self.otherPaused = False
-                    self.waitForResume = True
+            #     if pauseButton.collidepoint(event.pos):
+            #         print("clicked on resume!")
+            #         self.network.send_resume()
+            #         self.selfPaused = False
+            #         self.otherPaused = False
+            #         self.waitForResume = True
                 
                 
             # elif self.otherPaused:
@@ -458,6 +472,10 @@ class Player:
         
         # On button release
         if event.type == pygame.MOUSEBUTTONUP and (not self.startScreen) \
+                                              and (not self.waiting)     \
+                                              and (not self.selfPaused)  \
+                                              and (not self.otherPaused) \
+                                              and (not self.waitForResume) \
                                               and event.button == 1:
             pygame.mouse.set_cursor(CURSOR1)
             mouseX, mouseY = event.pos
@@ -475,9 +493,31 @@ class Player:
             startPos = None
 
         # On key press
-        if event.type == pygame.KEYDOWN:
+        if event.type == pygame.KEYDOWN and (not self.startScreen):
             if event.key == pygame.K_p:
-                self.network.send_pause()
+                print("hit p!!!")
+                if self.selfPaused or self.otherPaused:
+                    print("hit p again to resume")
+                    self.waitForResume = True
+                    self.selfPaused = False
+                    self.otherPaused = False
+                    self.network.send_resume()
+                elif (not self.waitForResume):
+                    self.draw_button(*self.create_button(
+                                    "Game has been paused. Press 'P' to resume", 
+                                    50))
+                    self.network.send_pause()
+
+                # if (not self.selfPaused) and (not self.otherPaused):
+                #     self.draw_button(*self.create_button(
+                #                     "Game has been paused. Press 'P' to resume", 
+                #                     50))
+                #     self.network.send_pause()
+                # else:
+                #     self.network.send_resume()
+
+                print("p has been pressed!")
+                # self.network.send_pause()
 
         return startPos
 
@@ -619,6 +659,7 @@ class Player:
         
         """
         # create font, text and button rectangle
+        print("create button!")
         font = pygame.font.Font(None, fontSize)
         buttonText = font.render(text, True, "black")
         textRect = buttonText.get_rect(center=BUTTON_POS)
@@ -648,6 +689,7 @@ class Player:
         
         """
         # display rectangles and button
+        print("drawing button!")
         pygame.draw.rect(self.screen, BUTTON_COLOR, buttonRect)
         pygame.draw.rect(self.screen, "black", buttonRect, 2)
         self.screen.blit(
@@ -792,6 +834,7 @@ class Player:
         
         """
         # draw everything
+        print("drawing game state")
         self.draw_board()
         self.draw_colored_squares()
         self.draw_pieces()
