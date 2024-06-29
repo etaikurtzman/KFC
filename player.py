@@ -119,6 +119,16 @@ class Player:
 
     Board: self.currentEncodedBoard
         String representation of the last encoded board state.
+    
+    Pause Flag: self.selfPaused
+        Boolean indicating whether this player has paused the game.
+
+    Opponent Pause Flag: self.otherPaused
+        Boolean indicating whether the opponent has paused the game.
+
+    Resume Waiting Flag: self.waitForResume
+        Boolean indicating whether this player is waiting for the game to be
+        resumed.
 
 
     Functions
@@ -198,6 +208,7 @@ class Player:
 
         self.selfPaused = False
         self.otherPaused = False
+        self.waitForResume = False
 
     def get_updates_loop(self):
         """
@@ -295,6 +306,13 @@ class Player:
 
             case "PAUSED-OTHER:":
                 self.otherPaused = True
+                
+            case "RESUME:":
+                self.waitForResume = False
+                self.draw_game_state()
+                self.draw_button(*self.create_button("Resuming game in:", 50))
+                time.sleep(1)
+                self.draw_countdown()
             
             # Draw the win screen
             case "white" | "black":
@@ -345,25 +363,31 @@ class Player:
                     self.draw_button(*self.create_button(
                                         "Waiting for other player to join...", 
                                         50))
+                    
+                if self.waitForResume:
+                    self.draw_game_state()
+                    self.draw_button(*self.create_button(
+                                        "Waiting for other player to resume...", 
+                                        50))
                 
                 # this player has paused the game
-                if self.selfPaused:
-                    # CHANGE CURSOR!!!!!!!
-                    self.draw_game_state()
-                    self.draw_button(*self.create_button(
-                                        "Game is paused. Resume?", 
-                                        50))
+                # if self.selfPaused:
+                #     # CHANGE CURSOR!!!!!!!
+                #     self.draw_game_state()
+                #     self.draw_button(*self.create_button(
+                #                         "Game is paused. Resume?", 
+                #                         50))
                 
-                # the other player has paused the game
-                if self.otherPaused:
-                    self.draw_game_state()
-                    self.draw_button(*self.create_button(
-                                        "Other player has paused the game. \
-                                        Resume?",
-                                        50))
+                # # the other player has paused the game
+                # if self.otherPaused:
+                #     self.draw_game_state()
+                #     self.draw_button(*self.create_button(
+                #                         "Other player has paused the game. \
+                #                         Resume?",
+                #                         50))
 
                 # process events
-                else:
+                elif (not self.selfPaused) and (not self.otherPaused):
                     startPos = self.process_event(event, startPos)
 
         pygame.quit()
@@ -407,6 +431,26 @@ class Player:
                     self.network.send_start()
                     self.waiting = True
                     self.startScreen = False
+            
+            elif self.selfPaused or self.otherPaused:
+                pauseText, pauseButton = self.create_button(
+                                        "Game is paused. Resume?", 
+                                        50)
+                self.draw_button(pauseText, pauseButton)
+                
+                if pauseButton.collidepoint(event.pos):
+                    self.network.send_resume()
+                    self.selfPaused = False
+                    self.otherPaused = False
+                    self.waitForResume = True
+                
+                
+            # elif self.otherPaused:
+            #     otherPauseText, otherPauseButton = self.create_button(
+            #                             "Other player has paused the game. \
+            #                             Resume?",
+            #                             50)
+            #     self.draw_button(otherPauseText, otherPauseButton)
 
             # Send the click message
             elif startPos:
