@@ -186,9 +186,9 @@ class Player:
         self.screen = pygame.display.set_mode([BOARD_LENGTH, BOARD_LENGTH])
         
         self.winner = False
-        self.startScreen = True
+        # self.startScreen = True
 
-        self.waiting = None
+        self.waiting = "Start"
 
         self.clickedCoordinates = None
         self.draggedCoordinates = None
@@ -199,6 +199,9 @@ class Player:
         
         self.currentEncodedBoard = None
         self.currButton = None
+
+        # self.draw_button(self.waiting, 100)
+        # self.draw_game_state()
 
     def get_updates_loop(self):
         """
@@ -233,9 +236,9 @@ class Player:
                         with self.cooldownLock:
                             self.draw_game_state()
 
-                            if self.startScreen:
-                                self.draw_button("Start", 100)
-                            pygame.display.update()
+                            # if self.startScreen:
+                            #     self.draw_button("Start", 100)
+                            # pygame.display.update()
     
     
     def process_update(self, msg):
@@ -345,7 +348,7 @@ class Player:
                     self.network.send_quit()
                     break
                 
-                if self.waiting:
+                if self.waiting and self.waiting != "Countdown":
                     pygame.mouse.set_cursor(CURSOR1)
                     self.draw_game_state()
                     self.draw_button(self.waiting, 50)
@@ -386,26 +389,35 @@ class Player:
             startPos = (mouseX // SQUARE_LENGTH, mouseY // SQUARE_LENGTH)
 
             # Start the game
-            if self.startScreen:
-                self.draw_button("Start", 100)
+            # if self.startScreen:
+            #     self.draw_button("Start", 100)
 
-                if self.currButton.collidepoint(event.pos):
+            #     if self.currButton.collidepoint(event.pos):
+                    # self.network.send_start()
+                    # self.waiting = "Waiting for other player to join..."
+                    # self.startScreen = False
+
+            if self.waiting and self.currButton.collidepoint(event.pos):
+                if self.waiting == "Start":
                     self.network.send_start()
                     self.waiting = "Waiting for other player to join..."
-                    self.startScreen = False
 
-            elif self.waiting and self.waiting.endswith("Resume?"):
-                if self.currButton.collidepoint(event.pos):
+                elif self.waiting.endswith("Resume?"):
                     self.network.send_resume()
                     self.waiting = "Waiting for other player to resume..."
 
+            # elif self.waiting and self.waiting.endswith("Resume?"):
+            #     if self.currButton.collidepoint(event.pos):
+            #         self.network.send_resume()
+            #         self.waiting = "Waiting for other player to resume..."
+
             # Send the click message
             elif startPos:
-                self.network.send_click(str(startPos))
+                if self.waiting != "Countdown":
+                    self.network.send_click(str(startPos))
         
         # On button release
-        if event.type == pygame.MOUSEBUTTONUP and (not self.startScreen) \
-                                              and (not self.waiting) \
+        if event.type == pygame.MOUSEBUTTONUP and (not self.waiting) \
                                               and event.button == 1:
             pygame.mouse.set_cursor(CURSOR1)
             mouseX, mouseY = event.pos
@@ -423,7 +435,7 @@ class Player:
             startPos = None
 
         # On key press
-        if event.type == pygame.KEYDOWN and (not self.startScreen):
+        if event.type == pygame.KEYDOWN and self.waiting != "Start":
             if event.key == pygame.K_p:
                 self.network.send_pause()
 
@@ -473,21 +485,23 @@ class Player:
         None
         
         """
+        self.waiting = "Countdown"
         self.draw_board()
         self.draw_pieces()
         
         # draw the countdown by creating 3 buttons.
         count = 3
         while count > 0:
-            self.draw_button(str(count) + "...", 100)
+            self.draw_button(str(count) + "...", 50)
             self.draw_board()
             self.draw_pieces()
             time.sleep(1)
             count -= 1
             
         # draw the Go! button
-        self.draw_button("Go!", 100)
+        self.draw_button("Go!", 50)
         time.sleep(1)
+        self.waiting = None
     
 
     def get_coordinates(self, x, y):
